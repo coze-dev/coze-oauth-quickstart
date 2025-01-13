@@ -169,3 +169,42 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Go specific
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# Go workspace file
+go.work
+
+# Go build
+bin/
+pkg/
+
+# Go coverage
+coverage.txt
+coverage.html
+
+# Go profiling
+*.prof
+*.pprof
+
+# Go debug
+debug
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
