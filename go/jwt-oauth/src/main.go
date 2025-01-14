@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/coze-dev/coze-go"
 )
@@ -62,7 +63,7 @@ func main() {
 	}
 
 	// Check if port 8080 is available
-	listener, err := net.Listen("tcp", ":8080")
+	listener, err := net.Listen("tcp", "127.0.0.1:8080")
 	if err != nil {
 		log.Fatalf("Port 8080 is already in use by another application. Please free up the port and try again")
 	}
@@ -91,9 +92,39 @@ func main() {
 		json.NewEncoder(w).Encode(tokenResp)
 	})
 
-	log.Printf("Server starting on :8080... (API Base: %s, Client Type: %s, Client ID: %s)\n",
-		config.CozeAPIBase, config.ClientType, config.ClientID)
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	// Start HTTP server in a separate goroutine
+	go func() {
+		log.Printf("Server starting on 127.0.0.1:8080... (API Base: %s, Client Type: %s, Client ID: %s)\n",
+			config.CozeAPIBase, config.ClientType, config.ClientID)
+		if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
+			log.Fatalf("Server failed to start: %v", err)
+		}
+	}()
+
+	// Wait a moment for the server to start
+	time.Sleep(time.Second)
+
+	// Make a POST request to the local /token endpoint
+	log.Println("Making request to /token endpoint to get access token...")
+	resp, err := http.Post("http://127.0.0.1:8080/token", "application/json", nil)
+	if err != nil {
+		log.Fatalf("Failed to request token: %v", err)
 	}
+	defer resp.Body.Close()
+
+	// Parse the response
+	var tokenResp TokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+		log.Fatalf("Failed to decode token response: %v", err)
+	}
+
+	// Print the access token information
+	log.Printf("Successfully obtained access token:")
+	log.Printf("Access Token: %s", tokenResp.AccessToken)
+	log.Printf("Expires In: %d seconds", tokenResp.ExpiresIn)
+
+	log.Printf("\nServer is still running. You can get a new access token anytime using: curl -XPOST http://127.0.0.1:8080/token")
+
+	// Keep the main goroutine running
+	select {}
 }
