@@ -46,6 +46,9 @@ func loadConfig() (*Config, error) {
 }
 
 func main() {
+	// Set log flags to remove timestamp
+	log.SetFlags(0)
+
 	// Load configuration from config.json
 	config, err := loadConfig()
 	if err != nil {
@@ -94,7 +97,7 @@ func main() {
 
 	// Start HTTP server in a separate goroutine
 	go func() {
-		log.Printf("Server starting on 127.0.0.1:8080... (API Base: %s, Client Type: %s, Client ID: %s)\n",
+		log.Printf("\nServer starting on 127.0.0.1:8080... (API Base: %s, Client Type: %s, Client ID: %s)\n",
 			config.CozeAPIBase, config.ClientType, config.ClientID)
 		if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
 			log.Fatalf("Server failed to start: %v", err)
@@ -105,7 +108,7 @@ func main() {
 	time.Sleep(time.Second)
 
 	// Make a POST request to the local /token endpoint
-	log.Println("Making request to /token endpoint to get access token...")
+	log.Println("\nMaking request to /token endpoint to get access token...")
 	resp, err := http.Post("http://127.0.0.1:8080/token", "application/json", nil)
 	if err != nil {
 		log.Fatalf("Failed to request token: %v", err)
@@ -121,7 +124,8 @@ func main() {
 	// Print the access token information
 	log.Printf("Successfully obtained access token:")
 	log.Printf("Access Token: %s", tokenResp.AccessToken)
-	log.Printf("Expires In: %d seconds", tokenResp.ExpiresIn)
+	expiresAt := time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
+	log.Printf("Token will expire at: %s", expiresAt.Format("2006-01-02 15:04:05"))
 
 	log.Printf("\nServer is still running. You can get a new access token anytime using: curl -XPOST http://127.0.0.1:8080/token")
 
