@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/coze-dev/coze-go"
 )
@@ -28,16 +27,12 @@ type TokenResponse struct {
 }
 
 func loadConfig() (*Config, error) {
-	// Get the directory of the current executable
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	// Read config file from current directory
+	configFile, err := os.ReadFile("config.json")
 	if err != nil {
-		return nil, fmt.Errorf("failed to get current directory: %v", err)
-	}
-
-	// Read config file
-	configPath := filepath.Join(dir, "config.json")
-	configFile, err := os.ReadFile(configPath)
-	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("config.json not found in current directory")
+		}
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
