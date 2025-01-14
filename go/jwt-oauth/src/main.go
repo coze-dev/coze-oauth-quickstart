@@ -74,7 +74,7 @@ func main() {
 
 	// Define HTTP handler
 	http.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
+		if r.Method != http.MethodGet {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
@@ -109,7 +109,7 @@ func main() {
 
 	// Make a POST request to the local /token endpoint
 	log.Println("\nMaking request to /token endpoint to get access token...")
-	resp, err := http.Post("http://127.0.0.1:8080/token", "application/json", nil)
+	resp, err := http.Get("http://127.0.0.1:8080/token")
 	if err != nil {
 		log.Fatalf("Failed to request token: %v", err)
 	}
@@ -127,7 +127,7 @@ func main() {
 	expiresAt := time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
 	log.Printf("Token will expire at: %s", expiresAt.Format("2006-01-02 15:04:05"))
 
-	log.Printf("\nServer is still running. You can get a new access token anytime using: curl -XPOST http://127.0.0.1:8080/token")
+	log.Printf("\nServer is still running. You can get a new access token anytime using: curl http://127.0.0.1:8080/token")
 
 	// Keep the main goroutine running
 	select {}
