@@ -83,7 +83,8 @@ func main() {
 		json.NewEncoder(w).Encode(tokenResp)
 	})
 
-	fmt.Printf("Server starting on :8080... (API Base: %s)\n", config.CozeAPIBase)
+	log.Printf("Server starting on :8080... (API Base: %s, Client Type: %s, Client ID: %s)\n",
+		config.CozeAPIBase, config.ClientType, config.ClientID)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
