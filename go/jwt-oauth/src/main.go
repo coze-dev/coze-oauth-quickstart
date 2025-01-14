@@ -13,7 +13,6 @@ import (
 
 type Config struct {
 	ClientType  string `json:"client_type"`
-	AppID       string `json:"app_id"`
 	ClientID    string `json:"client_id"`
 	PrivateKey  string `json:"private_key"`
 	PublicKeyID string `json:"public_key_id"`
