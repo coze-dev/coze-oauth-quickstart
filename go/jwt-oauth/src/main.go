@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 
@@ -59,6 +60,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating JWT OAuth client: %v\n", err)
 	}
+
+	// Check if port 8080 is available
+	listener, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		log.Fatalf("Port 8080 is already in use by another application. Please free up the port and try again")
+	}
+	listener.Close()
 
 	// Define HTTP handler
 	http.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {

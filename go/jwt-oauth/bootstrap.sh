@@ -18,6 +18,7 @@ cd src || {
 }
 
 # Build the binary
+echo "Building application..."
 go build -o coze_jwt_quickstart main.go || {
     echo "Error: Failed to build the application"
     exit 1
