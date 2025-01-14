@@ -12,18 +12,15 @@ fi
 echo "Using Go version: $(go version)"
 
 # Change to src directory and build
-cd src || {
-    echo "Error: src directory not found"
-    exit 1
-}
+cd src
 
 # Build the binary
 echo "Building application..."
-go build -o coze_jwt_quickstart main.go || {
+go build -o build/coze_jwt_quickstart main.go || {
     echo "Error: Failed to build the application"
     exit 1
 }
 
 # Run the binary
 echo "Starting the application..."
-./coze_jwt_quickstart
+./build/coze_jwt_quickstart
