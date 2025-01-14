@@ -124,7 +124,7 @@ func main() {
 	// Print the access token information
 	log.Printf("Successfully obtained access token:")
 	log.Printf("Access Token: %s", tokenResp.AccessToken)
-	expiresAt := time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
+	expiresAt := time.Unix(tokenResp.ExpiresIn, 0)
 	log.Printf("Token will expire at: %s", expiresAt.Format("2006-01-02 15:04:05"))
 
 	log.Printf("\nServer is still running. You can get a new access token anytime using: curl http://127.0.0.1:8080/token")
