@@ -39,6 +39,6 @@ echo ""
 pip install -q -r requirements.txt 2>/dev/null
 
 # Run the application
-echo "Starting device-oauth quickstart..."
+echo "Starting jwt-oauth quickstart..."
 echo ""
 python3 src/main.py
