@@ -209,4 +209,5 @@ debug
 .DS_Store
 Thumbs.db
 
-config.json
+# coze
+coze_oauth_config.json
