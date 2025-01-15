@@ -13,6 +13,8 @@ import (
 	"github.com/coze-dev/coze-go"
 )
 
+const CozeOAuthConfigPath = "coze_oauth_config.json"
+
 type Config struct {
 	ClientType  string `json:"client_type"`
 	ClientID    string `json:"client_id"`
@@ -29,10 +31,10 @@ type TokenResponse struct {
 
 func loadConfig() (*Config, error) {
 	// Read config file from current directory
-	configFile, err := os.ReadFile("config.json")
+	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("config.json not found in current directory")
+			return nil, fmt.Errorf("coze_oauth_config.json not found in current directory")
 		}
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
@@ -49,7 +51,7 @@ func main() {
 	// Set log flags to remove timestamp
 	log.SetFlags(0)
 
-	// Load configuration from config.json
+	// Load configuration from coze_oauth_config.json
 	config, err := loadConfig()
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
