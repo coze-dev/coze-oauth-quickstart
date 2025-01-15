@@ -1,0 +1,5 @@
+app:
+  client_id: "your-client-id"
+  private_key: "your-private-key"
+  public_key_id: "your-public-key-id"
+  coze_api_base: "https://api.coze.com" 
