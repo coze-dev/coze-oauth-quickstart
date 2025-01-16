@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: Attach quickstart package to release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build
+        run: |
+          ./build.sh
+      - name: Upload quickstart package to Github Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: release/*
+          allowUpdates: true
+          omitBody: false
