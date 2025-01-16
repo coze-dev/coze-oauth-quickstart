@@ -1,4 +1,4 @@
-package com.coze.common.config;
+package com.coze.device.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.exc.StreamReadException;
@@ -38,7 +38,7 @@ public class AppConfig {
     private String cozeApiBase;
 
     @JsonProperty("redirect_uri")
-    private String redirectUri = "http://localhost:8080/callback";
+     private final String redirectUri = "http://localhost:8080/callback";
 
     private static volatile AppConfig instance;
 

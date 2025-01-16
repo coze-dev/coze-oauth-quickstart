@@ -1,6 +1,6 @@
-package com.coze.common.utils;
+package com.coze.jwt.utils;
 
-import com.coze.common.model.TokenResponse;
+import com.coze.jwt.model.TokenResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;

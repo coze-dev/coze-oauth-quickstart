@@ -1,7 +1,7 @@
 package com.coze.web;
 
-import com.coze.common.config.AppConfig;
 import com.coze.openapi.service.auth.WebOAuthClient;
+import com.coze.web.config.AppConfig;
 import com.coze.web.server.TokenServer;
 
 public class Main {

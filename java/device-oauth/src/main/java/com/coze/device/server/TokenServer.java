@@ -1,6 +1,6 @@
 package com.coze.device.server;
 
-import com.coze.common.model.TokenResponse;
+import com.coze.device.model.TokenResponse;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.DeviceOAuthClient;
 import io.javalin.Javalin;

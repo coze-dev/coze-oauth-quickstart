@@ -1,9 +1,9 @@
 package com.coze.web.server;
 
-import com.coze.common.config.AppConfig;
-import com.coze.common.model.TokenResponse;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.WebOAuthClient;
+import com.coze.web.config.AppConfig;
+import com.coze.web.model.TokenResponse;
 import io.javalin.Javalin;
 
 public class TokenServer {

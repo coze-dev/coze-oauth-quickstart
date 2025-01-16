@@ -1,9 +1,9 @@
 package com.coze.device;
 
-import com.coze.common.config.AppConfig;
-import com.coze.common.model.TokenResponse;
-import com.coze.common.utils.Client;
+import com.coze.device.config.AppConfig;
+import com.coze.device.model.TokenResponse;
 import com.coze.device.server.TokenServer;
+import com.coze.device.utils.Client;
 import com.coze.openapi.client.auth.DeviceAuthResp;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.client.exception.AuthErrorCode;

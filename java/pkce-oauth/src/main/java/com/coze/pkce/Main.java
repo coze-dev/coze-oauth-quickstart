@@ -1,10 +1,7 @@
 package com.coze.pkce;
 
-import com.coze.common.config.AppConfig;
-import com.coze.common.model.TokenResponse;
-import com.coze.common.utils.Client;
 import com.coze.openapi.service.auth.PKCEOAuthClient;
-import com.coze.openapi.service.auth.WebOAuthClient;
+import com.coze.pkce.config.AppConfig;
 import com.coze.pkce.server.TokenServer;
 
 public class Main {

@@ -1,10 +1,10 @@
 package com.coze.pkce.server;
 
-import com.coze.common.config.AppConfig;
-import com.coze.common.model.TokenResponse;
 import com.coze.openapi.client.auth.GetPKCEAuthURLResp;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.PKCEOAuthClient;
+import com.coze.pkce.config.AppConfig;
+import com.coze.pkce.model.TokenResponse;
 import io.javalin.Javalin;
 
 public class TokenServer {

@@ -1,0 +1,23 @@
+[versions]
+spring-boot = "3.2.3"
+spring-dependency = "1.1.4"
+junit = "5.10.0"
+snakeyaml = "2.0"
+coze = "0.2.0"
+
+[libraries]
+spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web" }
+spring-boot-starter-actuator = { group = "org.springframework.boot", name = "spring-boot-starter-actuator" }
+spring-boot-configuration = { group = "org.springframework.boot", name = "spring-boot-configuration-processor" }
+lombok = { group = "org.projectlombok", name = "lombok" }
+snakeyaml = { group = "org.yaml", name = "snakeyaml", version.ref = "snakeyaml" }
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind" }
+jackson-yaml = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-yaml" }
+coze-api = { group = "com.coze", name = "coze-api", version.ref = "coze" }
+spring-boot-test = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
+junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency = { id = "io.spring.dependency-management", version.ref = "spring-dependency" } 

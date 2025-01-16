@@ -1,10 +1,10 @@
 package com.coze.jwt.server;
 
-import com.coze.common.model.TokenResponse;
+import com.coze.jwt.config.AppConfig;
+import com.coze.jwt.model.TokenResponse;
 import com.coze.openapi.client.auth.OAuthToken;
 
 
-import com.coze.common.config.AppConfig;
 import com.coze.openapi.service.auth.JWTOAuthClient;
 import io.javalin.Javalin;
 

@@ -1,8 +1,6 @@
 package com.coze.jwt;
 
-import com.coze.common.config.AppConfig;
-import com.coze.common.model.TokenResponse;
-import com.coze.common.utils.Client;
+import com.coze.jwt.config.AppConfig;
 import com.coze.jwt.server.TokenServer;
 import com.coze.openapi.service.auth.JWTOAuthClient;
 
@@ -22,10 +20,6 @@ public class Main {
             // 启动服务器
             server = new TokenServer(oauth, config);
             server.start(PORT);
-            printServerInfo(config);
-
-            // 测试获取 token
-            testTokenEndpoint();
 
             // 保持主线程运行
             Thread.currentThread().join();
@@ -46,25 +40,5 @@ public class Main {
                 .build();
     }
 
-    private static void printServerInfo(AppConfig config) {
-        System.out.printf("\nServer starting on %s:%d... (API Base: %s, Client Type: %s, Client ID: %s)%n",
-                HOST, PORT, config.getCozeApiBase(), "jwt client", config.getClientId());
-    }
-
-    private static void testTokenEndpoint() throws Exception {
-        // 等待服务器启动
-        Thread.sleep(1000);
-
-        System.out.println("\nMaking request to /token endpoint to get access token...");
-        
-        // 发送请求
-        TokenResponse tokenResp = Client.getToken(String.format("http://%s:%d/token", HOST, PORT));
-        
-        // 打印结果
-        tokenResp.print();
-
-        System.out.println("\nServer is still running. You can get a new access token anytime using: " +
-                String.format("curl http://%s:%d/token", HOST, PORT));
-    }
 
 }

@@ -1,4 +1,4 @@
-package com.coze.common.model;
+package com.coze.pkce.model;
 
 import com.coze.openapi.client.auth.OAuthToken;
 import com.fasterxml.jackson.annotation.JsonProperty;
