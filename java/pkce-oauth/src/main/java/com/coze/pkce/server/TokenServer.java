@@ -1,18 +1,20 @@
-package com.coze.web.server;
+package com.coze.pkce.server;
 
 import com.coze.common.config.AppConfig;
 import com.coze.common.model.TokenResponse;
+import com.coze.openapi.client.auth.GetPKCEAuthURLResp;
 import com.coze.openapi.client.auth.OAuthToken;
-import com.coze.openapi.service.auth.WebOAuthClient;
+import com.coze.openapi.service.auth.PKCEOAuthClient;
 import io.javalin.Javalin;
 
 public class TokenServer {
-    private final WebOAuthClient oauthClient;
+    private final PKCEOAuthClient oauthClient;
     private final AppConfig appConfig;
+    private String codeVerifier;
     private String refreshToken;
     private Javalin app;
 
-    public TokenServer(WebOAuthClient oauthClient, AppConfig appConfig) {
+    public TokenServer(PKCEOAuthClient oauthClient, AppConfig appConfig) {
         this.oauthClient = oauthClient;
         this.appConfig = appConfig;
     }
@@ -34,14 +36,14 @@ public class TokenServer {
                         ctx.status(400).result("Missing code parameter");
                         return;
                     }
-                    OAuthToken tokenResp = oauthClient.getAccessToken(code, appConfig.getRedirectUri());
+                    OAuthToken tokenResp = oauthClient.getAccessToken(code, appConfig.getRedirectUri(), codeVerifier);
                     this.refreshToken = tokenResp.getRefreshToken();
                     ctx.json(TokenResponse.convertToTokenResponse(tokenResp));
                 })
                 .get("/login", ctx -> {
-                    String url = oauthClient.getOAuthURL(appConfig.getRedirectUri(), "state");
-                    System.out.println(url);
-                    ctx.redirect(url);
+                    GetPKCEAuthURLResp resp = oauthClient.genOAuthURL(appConfig.getRedirectUri(), "state");
+                    this.codeVerifier = resp.getCodeVerifier();
+                    ctx.redirect(resp.getAuthorizationURL());
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(500).result("Error getting access token: " + e.getMessage());
