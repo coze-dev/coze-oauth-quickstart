@@ -7,6 +7,7 @@ for lang in python go java js; do
         continue # skip if not exist
     fi
 
+
     for dir in "$lang"/*; do
         echo "Processing $dir"
         if [ -d "$dir" ]; then
@@ -16,6 +17,12 @@ for lang in python go java js; do
                 echo "  Copied $source_bootstrap_file to $dir/bootstrap.sh"
             fi
             for shared_dir in shared/*; do
+                if [ "$lang" = "java" ]; then
+                    target_dir="$dir/src/main/resources"
+                    cp -rf "$shared_dir" "$target_dir/"
+                    echo "  Copied $shared_dir to $target_dir"
+                    continue
+                fi
                 shared_dirname=$(basename "$shared_dir")
                 cp -rf "$shared_dir" "$dir/"
                 echo "  Copied $shared_dir to $dir/$shared_dirname"
