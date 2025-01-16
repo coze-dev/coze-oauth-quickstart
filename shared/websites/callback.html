@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorization Successful - Coze OAuth</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f4ff 0%, #f8f9ff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            background: white;
+        }
+        .card-body {
+            padding: 3rem 2rem;
+        }
+        .logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+        }
+        .token-section {
+            background-color: #f8f9ff;
+            border-radius: 12px;
+            border: 1px solid #e8eeff;
+            margin: 1.5rem 0;
+        }
+        .token-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e8eeff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .token-header h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        .token-header .copy-btn {
+            background: none;
+            border: none;
+            color: #6366f1;
+            font-size: 0.875rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .token-header .copy-btn:hover {
+            background-color: #e8eeff;
+        }
+        .token-content {
+            padding: 1.5rem;
+            font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #444;
+            word-break: break-all;
+            margin: 0;
+        }
+        .token-row {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        .token-row:last-child {
+            margin-bottom: 0;
+        }
+        .token-label {
+            flex: 0 0 120px;
+            color: #666;
+            font-weight: 500;
+        }
+        .token-value {
+            flex: 1;
+            color: #111;
+        }
+        .status-bar {
+            width: 80px;
+            height: 4px;
+            background-color: #10b981;
+            border-radius: 2px;
+            margin: 0 auto 1.5rem;
+        }
+        .title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 1.5rem;
+        }
+        .btn-home {
+            background-color: #6366f1;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 32px;
+            font-size: 1rem;
+            color: white;
+            transition: all 0.2s ease;
+            margin-top: 1.5rem;
+        }
+        .btn-home:hover {
+            background-color: #5558e6;
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+        .info-text {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 1rem 0;
+        }
+        .copy-success {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .copy-success.show {
+            opacity: 1;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="copy-success" id="copySuccess">Copied to clipboard!</div>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-center">
+                    <img src="/assets/coze.png" alt="Coze Logo" class="logo">
+                    <div class="status-bar"></div>
+                    <h2 class="title">Authorization Successful</h2>
+                    <p class="info-text">You have successfully authorized the application. Here's your authorization information:</p>
+                </div>
+                <div class="token-section">
+                    <div class="token-header">
+                        <h3>Access Token</h3>
+                        <button class="copy-btn" onclick="copyToken('access_token')">Copy Token</button>
+                    </div>
+                    <div class="token-content">
+                        <div class="token-row">
+                            <span class="token-label">Token Type:</span>
+                            <span class="token-value">{{token_type}}</span>
+                        </div>
+                        <div class="token-row">
+                            <span class="token-label">Access Token:</span>
+                            <span class="token-value" id="access_token">{{access_token}}</span>
+                        </div>
+                        <div class="token-row refresh-token-row hidden">
+                            <span class="token-label">Refresh Token:</span>
+                            <span class="token-value" id="refresh_token">{{refresh_token}}</span>
+                        </div>
+                        <div class="token-row">
+                            <span class="token-label">Expires In:</span>
+                            <span class="token-value">{{expires_in}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <a href="/" class="btn btn-home">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function copyToken(elementId) {
+            const tokenElement = document.getElementById(elementId);
+            const tokenText = tokenElement.textContent;
+            
+            navigator.clipboard.writeText(tokenText).then(() => {
+                const successElement = document.getElementById('copySuccess');
+                successElement.classList.add('show');
+                setTimeout(() => {
+                    successElement.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html> 
