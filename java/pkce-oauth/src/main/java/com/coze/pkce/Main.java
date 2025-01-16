@@ -28,7 +28,9 @@ public class Main {
             server.start(PORT);
             // 保持主线程运行
             Thread.currentThread().join();
-        }finally {
+        }catch(Exception e){
+            e.printStackTrace();
+        } finally {
             server.stop();
         }
 
