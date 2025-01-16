@@ -211,3 +211,15 @@ Thumbs.db
 
 # coze
 coze_oauth_config.json
+go/**/assets
+go/**/websites
+go/**/bootstrap.sh
+js/**/assets
+js/**/websites
+js/**/bootstrap.sh
+python/**/assets
+python/**/websites
+python/**/bootstrap.sh
+java/**/assets
+java/**/websites
+java/**/bootstrap.sh
