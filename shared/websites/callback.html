@@ -149,7 +149,9 @@
         <div class="card">
             <div class="card-body">
                 <div class="text-center">
-                    <img src="/assets/coze.png" alt="Coze Logo" class="logo">
+                    <a href="{{coze_www_base}}" target="_blank">
+                        <img src="/assets/coze.png" alt="Coze Logo" class="logo">
+                    </a>
                     <div class="status-bar"></div>
                     <h2 class="title">Authorization Successful</h2>
                     <p class="info-text">You have successfully authorized the application. Here's your authorization information:</p>
@@ -157,7 +159,10 @@
                 <div class="token-section">
                     <div class="token-header">
                         <h3>Access Token</h3>
-                        <button class="copy-btn" onclick="copyToken('access_token')">Copy Token</button>
+                        <div>
+                            <button class="copy-btn me-2" onclick="refreshToken()" id="refreshBtn">Refresh Token</button>
+                            <button class="copy-btn" onclick="copyToken('access_token')">Copy Token</button>
+                        </div>
                     </div>
                     <div class="token-content">
                         <div class="token-row">
@@ -186,6 +191,71 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // 初始化页面时设置按钮文本和行为
+        document.addEventListener('DOMContentLoaded', function() {
+            const refreshTokenEle = document.getElementById('refresh_token');
+            const isJWT = !refreshTokenEle || !refreshTokenEle.textContent.trim();
+            if (isJWT) {
+                document.getElementById('refreshBtn').textContent = 'New Token';
+                // 隐藏 refresh token 行
+                document.querySelector('.refresh-token-row').style.display = 'none';
+            }
+        });
+
+        function showMessage(message, isSuccess = true) {
+            const successElement = document.getElementById('copySuccess');
+            successElement.textContent = message;
+            successElement.style.backgroundColor = isSuccess ? '#10b981' : '#ef4444';
+            successElement.classList.add('show');
+            setTimeout(() => {
+                successElement.classList.remove('show');
+            }, 2000);
+        }
+
+        async function refreshToken() {
+            const refreshTokenEle = document.getElementById('refresh_token');
+            const isJWT = !refreshTokenEle || !refreshTokenEle.textContent.trim();
+            
+            try {
+                let response;
+                if (isJWT) {
+                    // JWT OAuth: 直接获取新 token
+                    response = await fetch('/callback', {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                } else {
+                    // 普通 OAuth: 使用 refresh token 刷新
+                    const refreshToken = document.getElementById('refresh_token').textContent;
+                    response = await fetch('/refresh_token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ refresh_token: refreshToken })
+                    });
+                }
+                
+                if (!response.ok) {
+                    throw new Error(isJWT ? 'Failed to get new token' : 'Failed to refresh token');
+                }
+
+                const data = await response.json();
+                
+                // 更新页面上的 token
+                document.getElementById('access_token').textContent = data.access_token;
+                if (data.refresh_token) {
+                    document.getElementById('refresh_token').textContent = data.refresh_token;
+                }
+                
+                showMessage(isJWT ? 'New token generated successfully!' : 'Token refreshed successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(error.message, false);
+            }
+        }
+
         function copyToken(elementId) {
             const tokenElement = document.getElementById(elementId);
             const tokenText = tokenElement.textContent;
