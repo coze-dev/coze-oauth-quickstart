@@ -12,6 +12,7 @@ build/
 develop-eggs/
 dist/
 out/
+.gradle
 downloads/
 eggs/
 .eggs/
