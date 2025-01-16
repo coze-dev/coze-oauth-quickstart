@@ -3,7 +3,7 @@ import secrets
 from datetime import datetime
 
 from cozepy import load_oauth_app_from_config, JWTOAuthApp
-from flask import Flask, redirect, session
+from flask import Flask, redirect, session, request
 
 app = Flask(__name__,
             static_folder='assets',  # use shared/assets as static directory
@@ -36,20 +36,23 @@ def timestamp_to_datetime(timestamp: int) -> str:
     return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
 
+app_config = load_app_config(COZE_OAUTH_CONFIG_PATH)
+coze_oauth_app = load_coze_oauth_app(COZE_OAUTH_CONFIG_PATH)
+
+
 def read_html_template(file_path: str) -> str:
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read()
 
 
 def render_template(template: str, kwargs: dict) -> str:
+    if not kwargs:
+        kwargs = {}
+    kwargs['coze_www_base'] = app_config['coze_www_base']
     template = read_html_template(template)
     for key, value in kwargs.items():
         template = template.replace(f'{{{{{key}}}}}', str(value))
     return template
-
-
-app_config = load_app_config(COZE_OAUTH_CONFIG_PATH)
-coze_oauth_app = load_coze_oauth_app(COZE_OAUTH_CONFIG_PATH)
 
 
 @app.errorhandler(Exception)
@@ -92,6 +95,17 @@ def callback():
         }
 
         expires_str = timestamp_to_datetime(oauth_token.expires_in)
+
+        # 如果是 AJAX 请求，返回 JSON 格式
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return {
+                'token_type': oauth_token.token_type,
+                'access_token': oauth_token.access_token,
+                'refresh_token': '',
+                'expires_in': f"{oauth_token.expires_in} ({expires_str})"
+            }
+
+        # 否则返回 HTML 页面
         return render_template('websites/callback.html', {
             'token_type': oauth_token.token_type,
             'access_token': oauth_token.access_token,
@@ -99,8 +113,11 @@ def callback():
             'expires_in': f"{oauth_token.expires_in} ({expires_str})"
         })
     except Exception as e:
+        error_message = f"Failed to get access token: {str(e)}"
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return {'error': error_message}, 500
         return render_template('websites/error.html', {
-            'error': f"Failed to get access token: {str(e)}"
+            'error': error_message
         })
 
 

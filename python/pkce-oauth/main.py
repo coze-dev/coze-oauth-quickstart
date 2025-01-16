@@ -41,15 +41,18 @@ def read_html_template(file_path: str) -> str:
         return file.read()
 
 
+app_config = load_app_config(COZE_OAUTH_CONFIG_PATH)
+coze_oauth_app = load_coze_oauth_app(COZE_OAUTH_CONFIG_PATH)
+
+
 def render_template(template: str, kwargs: dict) -> str:
+    if not kwargs:
+        kwargs = {}
+    kwargs['coze_www_base'] = app_config['coze_www_base']
     template = read_html_template(template)
     for key, value in kwargs.items():
         template = template.replace(f'{{{{{key}}}}}', str(value))
     return template
-
-
-app_config = load_app_config(COZE_OAUTH_CONFIG_PATH)
-coze_oauth_app = load_coze_oauth_app(COZE_OAUTH_CONFIG_PATH)
 
 
 @app.errorhandler(Exception)
@@ -127,6 +130,38 @@ def callback():
         return render_template('websites/error.html', {
             'error': f"Failed to get access token: {str(e)}"
         })
+
+
+@app.route('/refresh_token', methods=['POST'])
+def refresh_token():
+    if not coze_oauth_app:
+        return {'error': "OAuth application is not properly configured"}, 500
+
+    try:
+        data = request.get_json()
+        refresh_token = data.get('refresh_token')
+        if not refresh_token:
+            return {'error': 'No refresh token provided'}, 400
+
+        oauth_token = coze_oauth_app.refresh_access_token(refresh_token=refresh_token)
+
+        # 更新 session 中的 token
+        session[f'oauth_token_{app_config["client_id"]}'] = {
+            'token_type': oauth_token.token_type,
+            'access_token': oauth_token.access_token,
+            'refresh_token': oauth_token.refresh_token,
+            'expires_in': oauth_token.expires_in
+        }
+
+        expires_str = timestamp_to_datetime(oauth_token.expires_in)
+        return {
+            'token_type': oauth_token.token_type,
+            'access_token': oauth_token.access_token,
+            'refresh_token': oauth_token.refresh_token,
+            'expires_in': f"{oauth_token.expires_in} ({expires_str})"
+        }
+    except Exception as e:
+        return {'error': f"Failed to refresh token: {str(e)}"}, 500
 
 
 if __name__ == "__main__":
