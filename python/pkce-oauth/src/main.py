@@ -68,7 +68,6 @@ def callback():
 
 
 if __name__ == "__main__":
-    print("Starting pkce-oauth quickstart...")
     print("Please visit the following url to authorize the app:")
     print(f"    URL: http://127.0.0.1:8080")
     print("")
