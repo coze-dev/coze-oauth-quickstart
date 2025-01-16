@@ -33,12 +33,20 @@ else
     source .venv/bin/activate
 fi
 
-echo ""
-
-# Install dependencies
-pip install -q -r requirements.txt 2>/dev/null
+# Check dependencies installed
+echo "Checking dependencies..."
+installed_deps=$(pip freeze)
+while IFS= read -r line || [[ -n "$line" ]]; do
+    [ -z "$line" ] && continue # skip empty line
+    pkg_name=$(echo "$line" | cut -d'=' -f1)
+    pkg_version=$(echo "$line" | cut -d'=' -f3)
+    if echo "$installed_deps" | grep -q "^$pkg_name==$pkg_version$"; then
+        echo "✓ $pkg_name==$pkg_version installed"
+    else
+        echo "Installing $pkg_name==$pkg_version ..."
+        pip install -q "$pkg_name==$pkg_version"
+    fi
+done < requirements.txt
 
 # Run the application
-echo "Starting jwt-oauth quickstart..."
-echo ""
-python3 src/main.py
+python3 main.py

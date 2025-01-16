@@ -8,9 +8,6 @@ Multi-language quickstart demo for Coze OAuth
 .
 ├── .gitignore
 ├── CONTRIBUTING.md
-├── locales
-│   ├── zh-CN.json    # zh-CN locale
-│   └── en-US.json    # en-US locale
 ├── language
 │   ├── jwt-oauth/
 │   │  ├── README.md     # full description
@@ -21,6 +18,9 @@ Multi-language quickstart demo for Coze OAuth
 │   ├── web-oauth/
 │   ├── pkce-oauth/
 │   └── device-oauth/
+├── shared/
+│   ├── website/
+│   └── ...
 └── README.md
 ```
 
