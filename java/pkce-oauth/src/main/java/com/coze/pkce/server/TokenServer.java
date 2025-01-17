@@ -55,7 +55,7 @@ public class TokenServer {
                     ctx.html(html);
 
                 })
-                .get("/refresh_token", ctx -> {
+                .post("/refresh_token", ctx -> {
                     OAuthToken oldToken = ctx.sessionAttribute(genTokenSessionKey());
                     if (oldToken == null) {
                         throw new RuntimeException("Authorization failed: No authorization code received.");

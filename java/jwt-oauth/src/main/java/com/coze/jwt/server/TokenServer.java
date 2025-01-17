@@ -56,11 +56,6 @@ public class TokenServer {
                     ctx.html(html);
 
                 })
-                .get("/refresh_token", ctx -> {
-                    OAuthToken tokenResp = oauthClient.getAccessToken();
-                    ctx.sessionAttribute(genTokenSessionKey(), tokenResp);
-                    ctx.json(TokenResponse.convertToTokenResponse(tokenResp));
-                })
                 .get("/callback", ctx -> {
                     try{
                         OAuthToken tokenResp = oauthClient.getAccessToken();
@@ -74,6 +69,10 @@ public class TokenServer {
                                         timestampToDateTime(tokenResp.getExpiresIn())
                                 )
                         );
+                        if ("XMLHttpRequest".equals(ctx.req.getHeader("X-Requested-With"))){
+                            ctx.json(model);
+                            return;
+                        }
                         String html = formatHtml(readFromResources("websites/callback.html"), model);
                         ctx.contentType("text/html");
                         ctx.result(html);

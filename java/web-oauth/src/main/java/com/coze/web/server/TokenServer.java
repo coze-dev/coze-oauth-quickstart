@@ -98,7 +98,7 @@ public class TokenServer {
                     String url = oauthClient.getOAuthURL(appConfig.getRedirectUri(), "state");
                     ctx.redirect(url);
                 })
-                .get("/refresh_token", ctx -> {
+                .post("/refresh_token", ctx -> {
                     OAuthToken oldToken = ctx.sessionAttribute(genTokenSessionKey());
                     if (oldToken == null) {
                         throw new RuntimeException("Authorization failed: No authorization code received.");

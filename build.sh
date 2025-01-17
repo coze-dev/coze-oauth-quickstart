@@ -22,7 +22,7 @@ for lang in python go java js; do
                 if [ "$lang" = "java" ]; then
                     target_dir="$dir/src/main/resources"
                     cp -rf "$shared_dir" "$target_dir/"
-                    echo "  Copied $shared_dir to $target_dir"
+                    echo "  ✅ Shared resources copied: $shared_dir to $target_dir"
                     continue
                 fi
                 shared_dirname=$(basename "$shared_dir")
