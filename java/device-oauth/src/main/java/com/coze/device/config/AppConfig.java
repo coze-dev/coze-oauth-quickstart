@@ -42,7 +42,7 @@ public class AppConfig {
         if (instance == null) {
             synchronized (AppConfig.class) {
                 if (instance == null) {
-                    instance = _load(configFilePath);
+                    instance = doLoad(configFilePath);
                 }
             }
         }
@@ -54,7 +54,7 @@ public class AppConfig {
         return load(configFilePath);
     }
 
-    private static AppConfig _load(String configFilePath) {
+    private static AppConfig doLoad(String configFilePath) {
         try (InputStream inputStream = new FileInputStream(configFilePath)) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.findAndRegisterModules();
