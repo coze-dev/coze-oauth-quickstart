@@ -13,21 +13,14 @@ for lang in python go java js; do
     for dir in "$lang"/*; do
         echo "📂 Processing directory: $dir"
         if [ -d "$dir" ]; then
-            source_bootstrap_file="$lang/bootstrap.sh"
-            if [ -f "$source_bootstrap_file" ]; then
-                cp -f $source_bootstrap_file "$dir/bootstrap.sh"
-                echo "  ✨ Bootstrap file copied successfully!"
-            fi
-            source_bootstrap_file="$lang/bootstrap.bat"
-            if [ -f "$source_bootstrap_file" ]; then
-                cp -f $source_bootstrap_file "$dir/bootstrap.bat"
-                echo "  ✨ Bootstrap bat file copied successfully!"
-            fi
-            source_bootstrap_file="$lang/bootstrap.ps1"
-            if [ -f "$source_bootstrap_file" ]; then
-                cp -f $source_bootstrap_file "$dir/bootstrap.ps1"
-                echo "  ✨ Bootstrap ps1 file copied successfully!"
-            fi
+            # Copy bootstrap files (sh, bat, ps1)
+            for ext in sh bat ps1; do
+                source_bootstrap_file="$lang/bootstrap.$ext"
+                if [ -f "$source_bootstrap_file" ]; then
+                    cp -f "$source_bootstrap_file" "$dir/bootstrap.$ext"
+                    echo "  ✨ Bootstrap $ext file copied successfully!"
+                fi
+            done
             for shared_dir in shared/*; do
                 if [ "$lang" = "java" ]; then
                     target_dir="$dir/src/main/resources"
