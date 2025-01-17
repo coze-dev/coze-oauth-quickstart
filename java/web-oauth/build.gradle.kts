@@ -40,7 +40,7 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 
     // coze api
-    implementation("com.coze:coze-api:0.2.0")
+    implementation("com.coze:coze-api:0.2.1")
 
     // 测试依赖
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -86,9 +86,6 @@ spotless {
 
         // 自定义导入顺序
         importOrder("java", "javax", "org", "com", "")
-
-        // 添加许可证头
-        licenseHeader("/* Copyright \$YEAR */")
     }
 }
 

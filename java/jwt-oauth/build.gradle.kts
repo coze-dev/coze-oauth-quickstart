@@ -1,6 +1,9 @@
 plugins {
     id("java")
     id("application")
+
+    id("checkstyle")
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
 group = "com.coze"
@@ -37,7 +40,7 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 
     // coze api
-    implementation("com.coze:coze-api:0.2.0")
+    implementation("com.coze:coze-api:0.2.1")
 
     // 测试依赖
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -68,4 +71,27 @@ java {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        // 使用 Google Java 格式化规则
+        googleJavaFormat()
+
+        // 移除未使用的 imports
+        removeUnusedImports()
+
+        // 确保文件以新行结束
+        endWithNewline()
+
+        // 自定义导入顺序
+        importOrder("java", "javax", "org", "com", "")
+    }
+}
+
+// Checkstyle 配置
+checkstyle {
+    toolVersion = "10.12.5"
+    configFile = file("config/checkstyle/checkstyle.xml")
+    maxWarnings = 0
 }

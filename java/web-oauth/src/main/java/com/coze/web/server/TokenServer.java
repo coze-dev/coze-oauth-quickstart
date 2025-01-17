@@ -1,4 +1,3 @@
-/* Copyright 2025 */
 package com.coze.web.server;
 
 import java.io.IOException;
@@ -89,7 +88,7 @@ public class TokenServer {
                     ctx.sessionAttribute(genTokenSessionKey(), tokenResp);
                     Map<String, String> model =
                         Map.of(
-                            "token_type", appConfig.getClientType(),
+                            "token_type", tokenResp.getTokenType(),
                             "access_token", tokenResp.getAccessToken(),
                             "refresh_token", tokenResp.getRefreshToken(),
                             "expires_in",

@@ -1,4 +1,3 @@
-/* Copyright 2025 */
 package com.coze.web.model;
 
 import java.time.Instant;
