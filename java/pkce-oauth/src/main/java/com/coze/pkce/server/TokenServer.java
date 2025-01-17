@@ -7,7 +7,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
 
 import com.coze.openapi.client.auth.GetPKCEAuthURLResp;
 import com.coze.openapi.client.auth.OAuthToken;
@@ -47,10 +50,9 @@ public class TokenServer {
             .get(
                 "/",
                 ctx -> {
-                  Map<String, String> model =
-                      Map.of(
-                          "client_type", appConfig.getClientType(),
-                          "client_id", appConfig.getClientId());
+                  Map<String, String> model = new HashMap<>();
+                  model.put("client_type", appConfig.getClientType());
+                  model.put("client_id", appConfig.getClientId());
                   String html = null;
                   try {
                     html = formatHtml(readFromResources("websites/index.html"), model);
@@ -86,16 +88,16 @@ public class TokenServer {
                     OAuthToken tokenResp =
                         oauthClient.getAccessToken(code, appConfig.getRedirectUri(), codeVerifier);
                     ctx.sessionAttribute(genTokenSessionKey(), tokenResp);
-                    Map<String, String> model =
-                        Map.of(
-                            "token_type", tokenResp.getTokenType(),
-                            "access_token", tokenResp.getAccessToken(),
-                            "refresh_token", tokenResp.getRefreshToken(),
-                            "expires_in",
-                                String.format(
-                                    "%d (%s)",
-                                    tokenResp.getExpiresIn(),
-                                    timestampToDateTime(tokenResp.getExpiresIn())));
+                    Map<String, String> model = new HashMap<>();
+                    model.put("token_type", tokenResp.getTokenType());
+                    model.put("access_token", tokenResp.getAccessToken());
+                    model.put("refresh_token", tokenResp.getRefreshToken());
+                    model.put(
+                        "expires_in",
+                        String.format(
+                            "%d (%s)",
+                            tokenResp.getExpiresIn(),
+                            timestampToDateTime(tokenResp.getExpiresIn())));
                     String html = formatHtml(readFromResources("websites/callback.html"), model);
                     ctx.contentType("text/html");
                     ctx.result(html);
@@ -115,7 +117,8 @@ public class TokenServer {
             .exception(
                 Exception.class,
                 (e, ctx) -> {
-                  Map<String, String> model = Map.of("error", e.getMessage());
+                  Map<String, String> model = new HashMap<>();
+                  model.put("error", e.getMessage());
                   String html = null;
                   try {
                     html = formatHtml(readFromResources("websites/error.html"), model);
@@ -149,7 +152,7 @@ public class TokenServer {
         if (inputStream == null) {
           throw new IllegalArgumentException("file not found: " + fileName);
         }
-        return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        return new String(IOUtils.toByteArray(inputStream), StandardCharsets.UTF_8);
       }
     } catch (IOException e) {
       throw new RuntimeException("read file failed: " + fileName, e);

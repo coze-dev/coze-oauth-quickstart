@@ -42,6 +42,8 @@ dependencies {
     // coze api
     implementation("com.coze:coze-api:0.2.1")
 
+    implementation("commons-io:commons-io:2.11.0")
+
     // 测试依赖
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
