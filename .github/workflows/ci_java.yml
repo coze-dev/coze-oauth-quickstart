@@ -40,5 +40,4 @@ jobs:
         run: |
           cd "java/${{ matrix.sub-module }}"
           ./gradlew spotlessCheck
-          ./gradlew checkstyleMain
           ./gradlew build

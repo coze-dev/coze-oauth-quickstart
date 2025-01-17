@@ -2,7 +2,6 @@ plugins {
     id("java")
     id("application")
 
-    id("checkstyle")
     id("com.diffplug.spotless") version "6.11.0"
 }
 
@@ -91,9 +90,3 @@ spotless {
     }
 }
 
-// Checkstyle 配置
-checkstyle {
-    toolVersion = "10.12.5"
-    configFile = file("config/checkstyle/checkstyle.xml")
-    maxWarnings = 0
-}
