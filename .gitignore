@@ -213,6 +213,7 @@ Thumbs.db
 
 # coze
 coze_oauth_config.json
+release/
 go/**/assets
 go/**/websites
 go/**/bootstrap.sh
