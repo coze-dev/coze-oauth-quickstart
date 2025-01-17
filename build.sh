@@ -9,6 +9,7 @@ for lang in python go java js; do
         continue # Skip non-existent directories
     fi
 
+
     for dir in "$lang"/*; do
         echo "📂 Processing directory: $dir"
         if [ -d "$dir" ]; then
@@ -18,6 +19,12 @@ for lang in python go java js; do
                 echo "  ✨ Bootstrap file copied successfully!"
             fi
             for shared_dir in shared/*; do
+                if [ "$lang" = "java" ]; then
+                    target_dir="$dir/src/main/resources"
+                    cp -rf "$shared_dir" "$target_dir/"
+                    echo "  ✅ Shared resources copied: $shared_dir to $target_dir"
+                    continue
+                fi
                 shared_dirname=$(basename "$shared_dir")
                 cp -rf "$shared_dir" "$dir/"
                 echo "  ✅ Shared resources copied: $shared_dirname"
