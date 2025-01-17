@@ -38,6 +38,7 @@ jobs:
           cache: 'gradle'
       - name: Check & Build
         run: |
+          cd "java/${{ matrix.sub-module }}"
           ./gradlew spotlessCheck
           ./gradlew checkstyleMain
           ./gradlew build
