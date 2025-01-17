@@ -3,7 +3,7 @@ plugins {
     id("application")
 
     id("checkstyle")
-    id("com.diffplug.spotless") version "6.25.0"
+    id("com.diffplug.spotless") version "6.11.0"
 }
 
 group = "com.coze"
@@ -65,7 +65,7 @@ tasks.register<Jar>("uberJar") {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(8))
     }
 }
 
