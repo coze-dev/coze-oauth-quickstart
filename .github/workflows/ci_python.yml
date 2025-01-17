@@ -1,0 +1,48 @@
+name: Python CI
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'python/**'
+      - '.github/workflows/ci_python.yml'
+  pull_request:
+    paths:
+      - 'python/**'
+      - '.github/workflows/ci_python.yml'
+  merge_group:
+    paths:
+      - 'python/**'
+      - '.github/workflows/ci_python.yml'
+
+permissions: write-all
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    name: test (python/${{ matrix.sub-module }} ${{ matrix.python-version }} on ${{ matrix.os-label }})
+    strategy:
+      fail-fast: false
+      matrix:
+        sub-module: [ "device-oauth", "jwt-oauth", "pkce-oauth", "web-oauth" ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.12" ]
+        os: [ "ubuntu-latest" ]
+        os-label: [ "Ubuntu" ]
+        include:
+          - { sub-module: "web-oauth", python-version: "3.8", os: "windows-latest", os-label: "Windows" }
+          - { sub-module: "web-oauth", python-version: "3.8", os: "macos-latest", os-label: "macOS" }
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - name: Check & Build
+        run: |
+          cd "python/${{ matrix.sub-module }}"
+          pip install -q --upgrade pip
+          pip install -q ruff==0.6.0 mypy==1.0.0 types-Flask==1.1.6
+          pip install -q -r requirements.txt
+          ruff check .
+          ruff format --check
+          mypy .

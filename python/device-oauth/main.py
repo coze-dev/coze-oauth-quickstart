@@ -9,7 +9,7 @@ def load_coze_oauth_app(config_path) -> DeviceOAuthApp:
     with open(config_path, "r") as file:
         config = file.read()
 
-    return load_oauth_app_from_config(config)
+    return load_oauth_app_from_config(config)  # type: ignore
 
 
 def timestamp_to_datetime(timestamp: int) -> str:
@@ -20,11 +20,13 @@ if __name__ == "__main__":
     coze_oauth_app = load_coze_oauth_app(COZE_OAUTH_CONFIG_PATH)
 
     device_code = coze_oauth_app.get_device_code()
-    print(f'Please visit the following url to authorize the app:')
-    print(f'    URL: {device_code.verification_url}')
-    print(f'')
+    print("Please visit the following url to authorize the app:")
+    print(f"    URL: {device_code.verification_url}")
+    print("")
 
-    oauth_token = coze_oauth_app.get_access_token(device_code=device_code.device_code, poll=True)
+    oauth_token = coze_oauth_app.get_access_token(
+        device_code=device_code.device_code, poll=True
+    )
     print(f"[device-oauth] token_type: {oauth_token.token_type}")
     print(f"[device-oauth] access_token: {oauth_token.access_token}")
     print(f"[device-oauth] refresh_token: {oauth_token.refresh_token}")
