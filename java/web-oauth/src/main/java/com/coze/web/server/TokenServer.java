@@ -41,12 +41,20 @@ public class TokenServer {
     }
 
     public void start(int port) {
-        app = Javalin.create(config ->{
-                    config.addStaticFiles("/assets", Location.CLASSPATH);
+        app = Javalin.create(config -> {
+                    config.addStaticFiles(staticFiles -> {
+                        staticFiles.directory = "/assets";
+                        staticFiles.location = Location.CLASSPATH;
+                        staticFiles.hostedPath = "/assets";
+                    });
+                    config.addStaticFiles(staticFiles -> {
+                        staticFiles.directory = "/websites";
+                        staticFiles.location = Location.CLASSPATH;
+                    });
                 })
                 .get("/", ctx -> {
                 Map<String, String> model = Map.of(
-                    "client_type", "web oauth",
+                    "client_type", appConfig.getClientType(),
                     "client_id", appConfig.getClientId()
                 );
                 String html = null;
@@ -67,9 +75,9 @@ public class TokenServer {
                     }
                     try{
                         OAuthToken tokenResp = oauthClient.getAccessToken(code, appConfig.getRedirectUri());
-                        ctx.json(TokenResponse.convertToTokenResponse(tokenResp));
+                        ctx.sessionAttribute(genTokenSessionKey(), tokenResp);
                         Map<String, String> model = Map.of(
-                                "token_type", "oauth",
+                                "token_type", appConfig.getClientType(),
                                 "access_token", tokenResp.getAccessToken(),
                                 "refresh_token", tokenResp.getRefreshToken(),
                                 "expires_in",String.format("%d (%s)",
@@ -89,6 +97,15 @@ public class TokenServer {
                 .get("/login", ctx -> {
                     String url = oauthClient.getOAuthURL(appConfig.getRedirectUri(), "state");
                     ctx.redirect(url);
+                })
+                .get("/refresh_token", ctx -> {
+                    OAuthToken oldToken = ctx.sessionAttribute(genTokenSessionKey());
+                    if (oldToken == null) {
+                        throw new RuntimeException("Authorization failed: No authorization code received.");
+                    }
+                    OAuthToken tokenResp = oauthClient.refreshToken(oldToken.getRefreshToken());
+                    ctx.sessionAttribute(genTokenSessionKey(), tokenResp);
+                    ctx.json(TokenResponse.convertToTokenResponse(tokenResp));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     Map<String, String> model = Map.of(
@@ -126,5 +143,9 @@ public class TokenServer {
                 ZoneId.systemDefault()
         );
         return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    private String genTokenSessionKey() {
+        return String.format("access_token_%s", appConfig.getClientId());
     }
 } 

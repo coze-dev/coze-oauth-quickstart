@@ -12,7 +12,7 @@ public class Main {
         TokenServer server = null;
         try {
             // 加载配置
-            AppConfig config = AppConfig.load(System.getenv("JWT_OAUTH_CONFIG_PATH"));
+            AppConfig config = AppConfig.load();
 
             // 初始化 JWT OAuth 客户端
             JWTOAuthClient oauth = createOAuthClient(config);

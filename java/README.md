@@ -19,99 +19,118 @@ The repository contains 4 OAuth example implementations:
 
 ## Configuration
 
-Each example requires environment variables to be set with your Coze API credentials:
+Each example requires config file to be set with your Coze API credentials:
 
 ### Web OAuth
 
 ### Set Environment Variables
 
-To run the Web OAuth example, set the following environment variables:
+To run the Web OAuth example, set the following config file:
 
-- `WEB_OAUTH_CONFIG_PATH` - Path to the Web OAuth configuration file
-The configuration file should be a YAML file with the following format:
-```yaml
-app:
-  client_id: "857890086xxxxxx3.app.coze"
-  client_secret: "2N0YlVDT5j44dr22Nx8mKBIxxxxx"
-  coze_api_base: "https://api.coze.cn"
+The configuration file should be a JSON file, named coze_oauth_config.json with the following format:
+```json
+{
+  "client_type": "web",
+  "client_id": "{client_id}",
+  "client_secret": "{client_secret}",
+  "redirect_uris": [
+    "http://127.0.0.1:8080/redirect"
+  ],
+  "coze_www_base": "https://www.coze.cn",
+  "coze_api_base": "https://api.coze.cn"
+}
 ```
+
+This file should be placed in the web-auth directory.
 
 #### Running the Examples
 
-After configuring the environment variables, you can run the WEB OAuth example using:
+After configuring the config file, you can run the WEB OAuth example using:
 
 ```bash
-./gradlew :web-oauth:run
+cd web-oauth
+sh bootstrap.sh
 ```
 
 ### Device OAuth
 
 ### Set Environment Variables
 
-To run the Device OAuth example, set the following environment variables:
+To run the Device OAuth example, set the following config file:
 
-- `DEVICE_OAUTH_CONFIG_PATH` - Path to the Device OAuth configuration file
-The configuration file should be a YAML file with the following format:
-```yaml
-app:
-  client_id: "857890086xxxxxx3.app.coze"
-  coze_api_base: "https://api.coze.cn"
+The configuration file should be a JSON file, named coze_oauth_config.json with the following format:
+```json
+{
+  "client_type": "device",
+  "client_id": "{client_id}",
+  "coze_www_base": "https://www.coze.cn",
+  "coze_api_base": "https://api.coze.cn"
+}
 ```
+This file should be placed in the device-auth directory.
 
 #### Running the Examples
 
-After configuring the environment variables, you can run the Device OAuth example using:
+After configuring the config file, you can run the Device OAuth example using:
 
 ```bash
-./gradlew :device-oauth:run
+cd device-oauth
+sh bootstrap.sh
 ```
 
 ### PKCE OAuth
 
 ### Set Environment Variables
 
-To run the PKCE OAuth example, set the following environment variables:
+To run the PKCE OAuth example, set the following config file:
 
-- `PKCE_OAUTH_CONFIG_PATH` - Path to the PKCE OAuth configuration file
-The configuration file should be a YAML file with the following format:
-```yaml
-app:
-  client_id: "857890086xxxxxx3.app.coze"
-  coze_api_base: "https://api.coze.cn"
+The configuration file should be a JSON file, named coze_oauth_config.json with the following format:
+```json
+{
+  "client_type": "single_page",
+  "client_id": "{client_id}",
+  "redirect_uris": [
+    "http://127.0.0.1:8080/redirect"
+  ],
+  "coze_www_base": "https://www.coze.cn",
+  "coze_api_base": "https://api.coze.cn"
+}
 ```
+This file should be placed in the pkce-auth directory.
 
 #### Running the Examples
 
-After configuring the environment variables, you can run the PKCE OAuth example using:
+After configuring the config file, you can run the PKCE OAuth example using:
 
 ```bash
-./gradlew :pkce-oauth:run
+cd pkce-oauth
+sh bootstrap.sh
 ```
 
 ### JWT OAuth
 
 ### Set Environment Variables
 
-To run the JWT OAuth example, set the following environment variables:
+To run the JWT OAuth example, set the following config file:
 
-- `JWT_OAUTH_CONFIG_PATH` - Path to the JWT OAuth configuration file
-The configuration file should be a YAML file with the following format:
-```yaml
-app:
-  client_id: "1145*****"
-  private_key: "-----BEGIN PRIVATE KEY-----\n
-    MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCzyhyJYD+pefuC\n
-    7xaxlMC5ZiaRctfTW6o5TpZEvhiSEG46UFTlrfECgYA8aHcS1fpqW7VtNv12VplA\n
-    ***************************************************************\n
-    -----END PRIVATE KEY-----\n"
-  public_key_id: "**************"
-  coze_api_base: "https://api.coze.cn"
+The configuration file should be a JSON file, named coze_oauth_config.json with the following format:
+```json
+{
+  "client_type": "server",
+  "client_id": "{client_id}",
+  "private_key": "{private_key}",
+  "public_key_id": "{public_key_id}",
+  "coze_www_base": "https://www.coze.cn",
+  "coze_api_base": "https://api.coze.cn"
+}
 ```
+This file should be placed in the jwt-auth directory.
 
 #### Running the Examples
 
-After configuring the environment variables, you can run the JWT OAuth example using:
+After configuring the config file, you can run the JWT OAuth example using:
 
 ```bash
-./gradlew :jwt-oauth:run
+cd jwt-oauth
+sh bootstrap.sh
 ```

@@ -1,9 +1,6 @@
 package com.coze.device;
 
 import com.coze.device.config.AppConfig;
-import com.coze.device.model.TokenResponse;
-import com.coze.device.server.TokenServer;
-import com.coze.device.utils.Client;
 import com.coze.openapi.client.auth.DeviceAuthResp;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.client.exception.AuthErrorCode;
@@ -17,13 +14,9 @@ import java.time.format.DateTimeFormatter;
 
 @Slf4j
 public class Main {
-    private static final String HOST = "127.0.0.1";
-    private static final int PORT = 8080;
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    private static final int SERVER_START_DELAY = 1000;
 
     public static void main(String[] args) {
-        TokenServer server = null;
         try {
             AppConfig config = initializeConfig();
             DeviceOAuthClient oauth = createOAuthClient(config);
@@ -31,23 +24,15 @@ public class Main {
             
             if (token == null) {
                 log.error("Failed to obtain access token.");
-                return;
             }
-
-            server = startServer(oauth, token, config);
-            testTokenEndpoint();
-            waitForShutdown();
-            
         } catch (Exception e) {
             log.error("Application error", e);
             throw new RuntimeException(e);
-        } finally {
-            shutdownServer(server);
         }
     }
 
     private static AppConfig initializeConfig() {
-        return AppConfig.load(System.getenv("DEVICE_OAUTH_CONFIG_PATH"));
+        return AppConfig.load();
     }
 
     private static DeviceOAuthClient createOAuthClient(AppConfig config) {
@@ -57,18 +42,6 @@ public class Main {
                 .build();
     }
 
-    private static TokenServer startServer(DeviceOAuthClient oauth, OAuthToken token, AppConfig config) {
-        TokenServer server = new TokenServer(oauth, token.getRefreshToken());
-        server.start(PORT);
-        printServerInfo(config);
-        return server;
-    }
-
-    private static void shutdownServer(TokenServer server) {
-        if (server != null) {
-            server.stop();
-        }
-    }
 
     public static OAuthToken verifyDeviceToken(DeviceOAuthClient oauth) {
         DeviceAuthResp codeResp = oauth.getDeviceCode();
@@ -109,32 +82,10 @@ public class Main {
     private static void printTokenInfo(OAuthToken tokenResp) {
         log.info("Successfully obtained access token:");
         log.info("Access Token: {}", tokenResp.getAccessToken());
-        
-        Instant expiresAt = Instant.ofEpochSecond(tokenResp.getExpiresIn());
-        String formattedTime = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)
+        log.info("Refresh Token: {}", tokenResp.getRefreshToken());
+
+        log.info("Token will expire at: {}", DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)
                 .withZone(ZoneId.systemDefault())
-                .format(expiresAt);
-        
-        log.info("Token will expire at: {}", formattedTime);
-    }
-
-    private static void printServerInfo(AppConfig config) {
-        log.info("\nServer starting on {}:{}... (API Base: {}, Client Type: {}, Client ID: {})",
-                HOST, PORT, config.getCozeApiBase(), "device client", config.getClientId());
-    }
-
-    private static void testTokenEndpoint() throws Exception {
-        Thread.sleep(SERVER_START_DELAY);
-        log.info("\nMaking request to /refresh_token endpoint to get new access token...");
-
-        String url = String.format("http://%s:%d/refresh_token", HOST, PORT);
-        TokenResponse tokenResp = Client.getToken(url);
-        tokenResp.print();
-
-        log.info("\nServer is still running. You can get a new access token anytime using: curl {}", url);
-    }
-
-    private static void waitForShutdown() throws InterruptedException {
-        Thread.currentThread().join();
+                .format(Instant.ofEpochSecond(tokenResp.getExpiresIn())));
     }
 }
