@@ -35,7 +35,7 @@ public class AppConfig {
   @JsonProperty("coze_www_base")
   private String cozeWwwBase;
 
-  private final String redirectUri = "http://localhost:8080/callback";
+  private final String redirectUri = "http://127.0.0.1:8080/callback";
 
   private static volatile AppConfig instance;
 
