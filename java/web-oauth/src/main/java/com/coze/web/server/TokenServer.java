@@ -49,7 +49,6 @@ public class TokenServer {
                     "client_type", "web oauth",
                     "client_id", appConfig.getClientId()
                 );
-                System.out.println("Current working directory: " + System.getProperty("user.dir"));
                 String html = null;
                 try{
                     html = formatHtml(readFromResources("websites/index.html"), model);
@@ -89,7 +88,6 @@ public class TokenServer {
                 })
                 .get("/login", ctx -> {
                     String url = oauthClient.getOAuthURL(appConfig.getRedirectUri(), "state");
-                    System.out.println(url);
                     ctx.redirect(url);
                 })
                 .exception(Exception.class, (e, ctx) -> {
@@ -100,7 +98,7 @@ public class TokenServer {
                     try{
                         html = formatHtml(readFromResources("websites/error.html"), model);
                     }catch (Exception e1){
-                        ctx.status(500).result("Error getting access token: " + e.getMessage());
+                        ctx.status(500).result("Error getting html: " + e.getMessage());
                         return;
                     }
                     ctx.contentType("text/html");
