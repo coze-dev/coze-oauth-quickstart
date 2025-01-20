@@ -235,3 +235,9 @@ java/**/websites
 java/**/bootstrap.sh
 java/**/bootstrap.bat
 java/**/bootstrap.ps1
+
+
+# nodejs
+node_modules/
+package-lock.json
+nodejs/**/websites
