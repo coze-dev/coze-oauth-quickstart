@@ -17,6 +17,7 @@ go build -o build/main main.go || {
     echo "Error: Failed to build the application"
     exit 1
 }
+
 # Run the binary
 echo "Starting the application..."
 ./build/main
