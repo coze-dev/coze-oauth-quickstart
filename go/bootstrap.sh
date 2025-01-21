@@ -9,6 +9,7 @@ fi
 
 # Print Go version
 echo "Using Go version: $(go version)"
+
 # Change to src directory and build
 # Build the binary
 echo "Building application..."
