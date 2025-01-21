@@ -12,11 +12,11 @@ echo "Using Go version: $(go version)"
 cd src
 # Build the binary
 echo "Building application..."
-go build -o build/coze_jwt_quickstart main.go || {
+go build -o build/main main.go || {
     echo "Error: Failed to build the application"
     exit 1
 }
 # Run the binary
 echo "Starting the application..."
 cd ../
-./src/build/coze_jwt_quickstart
+./src/build/main

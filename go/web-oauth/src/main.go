@@ -53,6 +53,10 @@ func loadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to parse config file: %v", err)
 	}
 
+	if config.ClientType != "web" {
+		return nil, fmt.Errorf("invalid client type: %s, expect web", config.ClientType)
+	}
+
 	return &config, nil
 }
 
@@ -96,6 +100,8 @@ func handleError(w http.ResponseWriter, config *Config, err error) {
 }
 
 func main() {
+	log.SetFlags(0)
+
 	config, err := loadConfig()
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
@@ -230,7 +236,7 @@ func main() {
 		})
 	})
 
-	log.Printf("\nServer starting on 127.0.0.1:8080 (API Base: %s, Client Type: %s, Client ID: %s)\n",
+	log.Printf("Server starting on http://127.0.0.1:8080 (API Base: %s, Client Type: %s, Client ID: %s)\n",
 		config.CozeAPIBase, config.ClientType, config.ClientID)
 	if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
