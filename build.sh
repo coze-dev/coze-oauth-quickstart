@@ -4,11 +4,10 @@ set -e
 
 # 🌈 Let's make some magic happen! 
 echo "🚀 Starting the awesome file copying process..."
-for lang in python go java js; do
+for lang in python go java nodejs; do
     if [ ! -d "$lang" ]; then
         continue # Skip non-existent directories
     fi
-
 
     for dir in "$lang"/*; do
         echo "📂 Processing directory: $dir"
@@ -38,6 +37,13 @@ done
 echo "🎉 Shared files copied successfully! 🌟"
 echo ""
 
+# just for nodejs
+for dir in nodejs/*; do
+    if [ -d "$dir" ]; then
+        mv "$dir/assets" "$dir/websites/assets"
+    fi
+done
+
 echo "🚀 Creating release packages..."
 
 # Create release directory for packages
@@ -64,12 +70,18 @@ for lang in python go java nodejs; do
             # Enter directory and create zip package, excluding temp files
             # Use find command to exclude .venv directory first, then package remaining files
             (cd "$dir" && find . -type d -name ".venv" -prune -o -type f -print | \
+             # python
              grep -v "__pycache__" | \
+             grep -v ".mypy_cache" | \
              grep -v "\.pyc$" | \
+             # macos
              grep -v "\.DS_Store" | \
+             # config
              grep -v "coze_oauth_config.json" | \
+             # nodejs
              grep -v "node_modules" | \
              grep -v "package-lock.json" | \
+             # zip
              zip "../../release/$zip_name" -@)
             echo "  ✨ Package created successfully: release/$zip_name"
         fi

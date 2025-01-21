@@ -30,7 +30,6 @@ function loadConfig() {
   const requiredFields = [
     "client_type",
     "client_id",
-    "redirect_uris",
     "coze_www_base",
     "coze_api_base",
   ];
