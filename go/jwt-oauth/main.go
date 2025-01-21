@@ -182,7 +182,7 @@ func main() {
 		w.Write([]byte(result))
 	})
 
-	log.Printf("\nServer starting on 127.0.0.1:8080... (API Base: %s, Client Type: %s, Client ID: %s)\n",
+	log.Printf("\nServer starting on http://127.0.0.1:8080 (API Base: %s, Client Type: %s, Client ID: %s)\n",
 		config.CozeAPIBase, config.ClientType, config.ClientID)
 	if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)

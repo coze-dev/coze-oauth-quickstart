@@ -9,7 +9,6 @@ fi
 # Print Go version
 echo "Using Go version: $(go version)"
 # Change to src directory and build
-cd src
 # Build the binary
 echo "Building application..."
 go build -o build/main main.go || {
@@ -18,5 +17,4 @@ go build -o build/main main.go || {
 }
 # Run the binary
 echo "Starting the application..."
-cd ../
-./src/build/main
+./build/main

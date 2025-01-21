@@ -1,4 +1,4 @@
-module github.com/coze-dev/coze-oauth-quickstart/go/src/web-oauth
+module github.com/coze-dev/coze-oauth-quickstart/go/web-oauth
 
 go 1.18
 
