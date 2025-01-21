@@ -102,12 +102,7 @@ func main() {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	oauth := coze.NewOAuthClient(&coze.OAuthClientConfig{
-		ClientID:      config.ClientID,
-		PublicKey:     config.PublicKeyID,
-		PrivateKeyPEM: config.PrivateKey,
-		BaseURL:       config.CozeAPIBase,
-	})
+	oauth := coze.NewWebOAuthClient(config.ClientID, config.ClientSecret)
 
 	fs := http.FileServer(http.Dir("assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
@@ -148,7 +143,7 @@ func main() {
 		}
 
 		ctx := context.Background()
-		resp, err := oauth.GetWebAccessToken(ctx, &coze.GetWebAccessTokenReq{
+		resp, err := oauth.GetWebAccessToken(ctx, &coze.GetWebOAuthAccessTokenReq{
 			Code:        code,
 			RedirectURI: RedirectURI,
 		})
@@ -206,9 +201,7 @@ func main() {
 		}
 
 		ctx := context.Background()
-		resp, err := oauth.RefreshWebAccessToken(ctx, &coze.RefreshWebAccessTokenReq{
-			RefreshToken: requestData.RefreshToken,
-		})
+		resp, err := oauth.RefreshWebAccessToken(ctx, requestData.RefreshToken)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Failed to refresh token: %v", err), http.StatusInternalServerError)
 			return
