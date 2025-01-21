@@ -217,6 +217,7 @@ release/
 go/**/assets
 go/**/websites
 go/**/bootstrap.sh
+!go/bootstrap.sh
 go/**/bootstrap.bat
 go/**/bootstrap.ps1
 nodejs/**/assets
