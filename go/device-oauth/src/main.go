@@ -73,6 +73,7 @@ func main() {
 
 	resp, err := oauth.GetAccessToken(ctx, &coze.GetDeviceOAuthAccessTokenReq{
 		DeviceCode: deviceCode.DeviceCode,
+		Poll:       true,
 	})
 	if err != nil {
 		log.Fatalf("Error getting access token: %v\n", err)
