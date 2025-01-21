@@ -22,7 +22,7 @@ type Config struct {
 	ClientID    string `json:"client_id"`
 	PrivateKey  string `json:"private_key"`
 	PublicKeyID string `json:"public_key_id"`
-	CozeDomain  string `json:"coze_domain"`
+	CozeDomain  string `json:"coze_www_base"`
 	CozeAPIBase string `json:"coze_api_base"`
 }
 
@@ -45,6 +45,10 @@ func loadConfig() (*Config, error) {
 	var config Config
 	if err := json.Unmarshal(configFile, &config); err != nil {
 		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	}
+
+	if config.ClientType != "jwt" {
+		return nil, fmt.Errorf("invalid client type: %s. expected: jwt", config.ClientType)
 	}
 
 	return &config, nil
@@ -147,6 +151,7 @@ func main() {
 
 		expiresStr := fmt.Sprintf("%d (%s)", resp.ExpiresIn, timestampToDateTime(resp.ExpiresIn))
 		tokenResp := TokenResponse{
+			TokenType:    "Bearer",
 			AccessToken:  resp.AccessToken,
 			RefreshToken: "",
 			ExpiresIn:    expiresStr,
@@ -167,6 +172,7 @@ func main() {
 		}
 
 		data := map[string]interface{}{
+			"token_type":    tokenResp.TokenType,
 			"access_token":  tokenResp.AccessToken,
 			"refresh_token": tokenResp.RefreshToken,
 			"expires_in":    tokenResp.ExpiresIn,
