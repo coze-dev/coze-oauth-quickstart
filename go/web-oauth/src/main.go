@@ -101,7 +101,7 @@ func main() {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	oauth, err := coze.NewWebOAuthClient(config.ClientID, config.ClientSecret)
+	oauth, err := coze.NewWebOAuthClient(config.ClientID, config.ClientSecret, coze.WithAuthBaseURL(config.CozeAPIBase))
 	if err != nil {
 		log.Fatalf("Error creating OAuth client: %v", err)
 	}
@@ -122,7 +122,8 @@ func main() {
 		}
 
 		data := map[string]interface{}{
-			"coze_www_base": config.CozeDomain,
+			"client_type": config.ClientType,
+			"client_id":   config.ClientID,
 		}
 
 		result := renderTemplate(template, data)
@@ -133,6 +134,7 @@ func main() {
 		ctx := context.Background()
 		authURL := oauth.GetOAuthURL(ctx, &coze.GetWebOAuthURLReq{
 			RedirectURI: RedirectURI,
+			State:       "random",
 		})
 		http.Redirect(w, r, authURL, http.StatusFound)
 	})
@@ -228,7 +230,7 @@ func main() {
 		})
 	})
 
-	log.Printf("\nServer starting on 127.0.0.1:8080... (API Base: %s, Client Type: %s, Client ID: %s)\n",
+	log.Printf("\nServer starting on 127.0.0.1:8080 (API Base: %s, Client Type: %s, Client ID: %s)\n",
 		config.CozeAPIBase, config.ClientType, config.ClientID)
 	if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
