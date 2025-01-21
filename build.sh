@@ -45,7 +45,7 @@ rm -rf release || true
 mkdir -p release
 
 # Package each client directory
-for lang in python go java js; do
+for lang in python go java nodejs; do
     if [ ! -d "$lang" ]; then
         continue # Skip non-existent directories
     fi
@@ -68,6 +68,8 @@ for lang in python go java js; do
              grep -v "\.pyc$" | \
              grep -v "\.DS_Store" | \
              grep -v "coze_oauth_config.json" | \
+             grep -v "node_modules" | \
+             grep -v "package-lock.json" | \
              zip "../../release/$zip_name" -@)
             echo "  ✨ Package created successfully: release/$zip_name"
         fi
