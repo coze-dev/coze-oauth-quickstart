@@ -213,29 +213,29 @@ Thumbs.db
 
 # coze
 coze_oauth_config.json
-java/format_java.sh
 release/
 go/**/assets
 go/**/websites
 go/**/bootstrap.sh
 go/**/bootstrap.bat
 go/**/bootstrap.ps1
-js/**/assets
-js/**/websites
-js/**/bootstrap.sh
-js/**/bootstrap.bat
-js/**/bootstrap.ps1
+nodejs/**/assets
+nodejs/**/websites
+nodejs/**/bootstrap.sh
+nodejs/**/bootstrap.bat
+nodejs/**/bootstrap.ps1
 python/**/assets
 python/**/websites
 python/**/bootstrap.sh
 python/**/bootstrap.bat
 python/**/bootstrap.ps1
+java/format_java.sh
 java/**/assets
 java/**/websites
 java/**/bootstrap.sh
 java/**/bootstrap.bat
 java/**/bootstrap.ps1
-
+java/**/src/main/resources/
 
 # nodejs
 node_modules/

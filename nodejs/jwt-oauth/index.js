@@ -22,9 +22,9 @@ function loadConfig() {
   // Validate required fields
   const requiredFields = [
     "client_type",
-    "app_id",
     "client_id",
-    "client_secret",
+    "public_key_id",
+    "private_key",
     "coze_www_base",
     "coze_api_base",
   ];
@@ -115,9 +115,9 @@ router.get("/callback", async (ctx) => {
     // Get JWT OAuth token directly instead of redirecting
     const oauthToken = await getJWTToken({
       baseURL: config.coze_api_base,
-      appId: config.app_id,
+      appId: config.client_id,
       aud: "api.coze.cn",
-      keyid: config.client_id,
+      keyid: config.public_key_id,
       privateKey: config.client_secret,
     });
 

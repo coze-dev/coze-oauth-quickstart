@@ -29,7 +29,6 @@ function loadConfig() {
     "client_type",
     "client_id",
     "client_secret",
-    "redirect_uris",
     "coze_www_base",
     "coze_api_base",
   ];
