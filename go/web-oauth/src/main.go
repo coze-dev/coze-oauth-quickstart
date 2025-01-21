@@ -21,12 +21,11 @@ const (
 )
 
 type Config struct {
-	ClientType  string `json:"client_type"`
-	ClientID    string `json:"client_id"`
-	PrivateKey  string `json:"private_key"`
-	PublicKeyID string `json:"public_key_id"`
-	CozeDomain  string `json:"coze_www_base"`
-	CozeAPIBase string `json:"coze_api_base"`
+	ClientType   string `json:"client_type"`
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	CozeDomain   string `json:"coze_www_base"`
+	CozeAPIBase  string `json:"coze_api_base"`
 }
 
 type TokenResponse struct {
@@ -102,7 +101,10 @@ func main() {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	oauth := coze.NewWebOAuthClient(config.ClientID, config.ClientSecret)
+	oauth, err := coze.NewWebOAuthClient(config.ClientID, config.ClientSecret)
+	if err != nil {
+		log.Fatalf("Error creating OAuth client: %v", err)
+	}
 
 	fs := http.FileServer(http.Dir("assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
@@ -129,7 +131,7 @@ func main() {
 
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.Background()
-		authURL := oauth.GetWebOAuthURL(ctx, &coze.GetWebOAuthURLReq{
+		authURL := oauth.GetOAuthURL(ctx, &coze.GetWebOAuthURLReq{
 			RedirectURI: RedirectURI,
 		})
 		http.Redirect(w, r, authURL, http.StatusFound)
@@ -143,7 +145,7 @@ func main() {
 		}
 
 		ctx := context.Background()
-		resp, err := oauth.GetWebAccessToken(ctx, &coze.GetWebOAuthAccessTokenReq{
+		resp, err := oauth.GetAccessToken(ctx, &coze.GetWebOAuthAccessTokenReq{
 			Code:        code,
 			RedirectURI: RedirectURI,
 		})
@@ -201,7 +203,7 @@ func main() {
 		}
 
 		ctx := context.Background()
-		resp, err := oauth.RefreshWebAccessToken(ctx, requestData.RefreshToken)
+		resp, err := oauth.RefreshToken(ctx, requestData.RefreshToken)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Failed to refresh token: %v", err), http.StatusInternalServerError)
 			return
