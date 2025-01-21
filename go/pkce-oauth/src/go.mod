@@ -1,4 +1,4 @@
-module github.com/wasd96040501/coze-oauth-quickstart/go/pkce-oauth
+module github.com/coze-dev/coze-oauth-quickstart/go/pkce-oauth
 
 go 1.18
 
