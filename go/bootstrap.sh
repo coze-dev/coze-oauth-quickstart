@@ -6,6 +6,7 @@ if ! command -v go &> /dev/null; then
     echo "After installation, make sure 'go' command is available in your PATH"
     exit 1
 fi
+
 # Print Go version
 echo "Using Go version: $(go version)"
 # Change to src directory and build
