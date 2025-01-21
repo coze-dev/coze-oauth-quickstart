@@ -95,7 +95,7 @@ func main() {
 	}
 	listener.Close()
 
-	fs := http.FileServer(http.Dir("websites/assets"))
+	fs := http.FileServer(http.Dir("assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
