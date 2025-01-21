@@ -1,6 +1,6 @@
 module github.com/wasd96040501/coze-oauth-quickstart/go/pkce-oauth
 
-go 1.21
+go 1.18
 
 require (
 	github.com/coze-dev/coze-go v0.0.0-20250115094839-23bd27bd6561

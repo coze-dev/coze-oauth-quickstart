@@ -21,11 +21,10 @@ const (
 )
 
 type Config struct {
-	ClientType   string `json:"client_type"`
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	CozeDomain   string `json:"coze_www_base"`
-	CozeAPIBase  string `json:"coze_api_base"`
+	ClientType  string `json:"client_type"`
+	ClientID    string `json:"client_id"`
+	CozeDomain  string `json:"coze_www_base"`
+	CozeAPIBase string `json:"coze_api_base"`
 }
 
 type TokenResponse struct {
