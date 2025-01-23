@@ -10,14 +10,13 @@ fi
 # Print Go version
 echo "Using Go version: $(go version)"
 
-# Change to src directory and build
-# Build the binary
+# Build the application
 echo "Building application..."
 go build -o build/main main.go || {
     echo "Error: Failed to build the application"
     exit 1
 }
 
-# Run the binary
+# Run the application
 echo "Starting the application..."
 ./build/main
