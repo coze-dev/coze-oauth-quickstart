@@ -29,7 +29,7 @@ jobs:
         os: [ "ubuntu-latest" ]
         os-label: [ "Ubuntu" ]
         include:
-          - { python-version: "3.7", os: "ubuntu-22.04", os-label: "Ubuntu" }
+          - { sub-module: "web-oauth", python-version: "3.7", os: "ubuntu-22.04", os-label: "Ubuntu" }
           - { sub-module: "web-oauth", python-version: "3.8", os: "windows-latest", os-label: "Windows" }
           - { sub-module: "web-oauth", python-version: "3.8", os: "macos-latest", os-label: "macOS" }
     steps:
