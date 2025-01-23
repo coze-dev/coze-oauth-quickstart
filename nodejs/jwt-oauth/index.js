@@ -118,7 +118,7 @@ router.get("/callback", async (ctx) => {
       appId: config.client_id,
       aud: "api.coze.cn",
       keyid: config.public_key_id,
-      privateKey: config.client_secret,
+      privateKey: config.private_key,
     });
 
     // Check if it's an AJAX request
