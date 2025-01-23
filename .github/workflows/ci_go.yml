@@ -42,13 +42,17 @@ jobs:
           cd "go/${{ matrix.sub-module }}"
           go mod download
           go install mvdan.cc/gofumpt@v0.5.0
-      - name: Check & Build
+      - name: Format Check
+        if: runner.os != 'Windows'
         run: |
           cd "go/${{ matrix.sub-module }}"
           if ! test -z "$(gofumpt -d -e . | tee /dev/stderr)"; then
             echo "❗️ gofumpt check failed"
             exit 1
           fi
+      - name: Build & Test
+        run: |
+          cd "go/${{ matrix.sub-module }}"
           go vet ./...
           go build ./...
           go test ./...
