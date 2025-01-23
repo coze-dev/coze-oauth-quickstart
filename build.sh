@@ -12,6 +12,9 @@ for lang in python go java nodejs; do
     for dir in "$lang"/*; do
         echo "📂 Processing directory: $dir"
         if [ -d "$dir" ]; then
+            # Copy quickstart.md
+            cp -f shared/quickstart.md "$dir/quickstart.md"
+            
             # Copy bootstrap files (sh, bat, ps1)
             for ext in sh bat ps1; do
                 source_bootstrap_file="$lang/bootstrap.$ext"
