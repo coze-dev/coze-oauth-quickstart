@@ -20,7 +20,7 @@ permissions: write-all
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    name: test (go/${{ matrix.sub-module }} ${{ matrix.python-version }} on ${{ matrix.os-label }})
+    name: test (go/${{ matrix.sub-module }} ${{ matrix.go-version }} on ${{ matrix.os-label }})
     strategy:
       fail-fast: false
       matrix:
