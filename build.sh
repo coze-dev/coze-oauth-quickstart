@@ -8,9 +8,10 @@ for lang in python go java nodejs; do
     if [ ! -d "$lang" ]; then
         continue # Skip non-existent directories
     fi
+    echo "📂 Processing language: $lang"
 
-    for dir in "$lang"/*; do
-        echo "📂 Processing directory: $dir"
+    for dir in "$lang"/*/; do
+        echo "├── 📁 Processing: $dir"
         if [ -d "$dir" ]; then
             # Copy quickstart.md
             cp -f shared/quickstart.md "$dir/quickstart.md"
@@ -20,30 +21,31 @@ for lang in python go java nodejs; do
                 source_bootstrap_file="$lang/bootstrap.$ext"
                 if [ -f "$source_bootstrap_file" ]; then
                     cp -f "$source_bootstrap_file" "$dir/bootstrap.$ext"
-                    echo "  ✨ Bootstrap $ext file copied successfully!"
+                    echo "│   ├── ✅ Bootstrap $ext file copied successfully!"
                 fi
             done
             for shared_dir in shared/*; do
                 if [ "$lang" = "java" ]; then
                     target_dir="$dir/src/main/resources"
                     cp -rf "$shared_dir" "$target_dir/"
-                    echo "  ✅ Shared resources copied: $shared_dir to $target_dir"
+                    echo "│   ├── ✅ Shared resources copied: $shared_dir to $target_dir"
                     continue
                 fi
                 shared_dirname=$(basename "$shared_dir")
                 cp -rf "$shared_dir" "$dir/"
-                echo "  ✅ Shared resources copied: $shared_dirname"
+                echo "│   ├── ✅ Shared resources copied: $shared_dirname"
             done
         fi
     done
 done
-echo "🎉 Shared files copied successfully! 🌟"
+echo "└── 🎉 Shared files copied successfully! 🌟"
 echo ""
 
 # just for nodejs
-for dir in nodejs/*; do
+for dir in nodejs/*/; do
     if [ -d "$dir" ]; then
-        mv "$dir/assets" "$dir/websites/assets"
+        rm -rf $dir"websites/assets" || true
+        mv $dir"assets" $dir"websites"
     fi
 done
 
@@ -75,6 +77,7 @@ for lang in python go java nodejs; do
             (cd "$dir" && find . -type d -name ".venv" -prune -o -type f -print | \
              # python
              grep -v "__pycache__" | \
+             grep -v ".ruff_cache" | \
              grep -v ".mypy_cache" | \
              grep -v "\.pyc$" | \
              # macos
@@ -84,6 +87,8 @@ for lang in python go java nodejs; do
              # nodejs
              grep -v "node_modules" | \
              grep -v "package-lock.json" | \
+             # java
+             grep -v ".gradle" | \
              # zip
              zip "../../release/$zip_name" -@)
             echo "  ✨ Package created successfully: release/$zip_name"
