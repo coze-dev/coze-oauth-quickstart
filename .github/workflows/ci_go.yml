@@ -39,6 +39,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Install dependencies
         run: |
+          cd "go/${{ matrix.sub-module }}"
           go mod download
           go install mvdan.cc/gofumpt@v0.5.0
       - name: Check & Build
