@@ -1,0 +1,58 @@
+name: Go CI
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'go/**'
+      - '.github/workflows/ci_go.yml'
+  pull_request:
+    paths:
+      - 'go/**'
+      - '.github/workflows/ci_go.yml'
+  merge_group:
+    paths:
+      - 'go/**'
+      - '.github/workflows/ci_go.yml'
+
+permissions: write-all
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    name: test (go/${{ matrix.sub-module }} ${{ matrix.go-version }} on ${{ matrix.os-label }})
+    strategy:
+      fail-fast: false
+      matrix:
+        sub-module: [ "device-oauth", "jwt-oauth", "pkce-oauth", "web-oauth" ]
+        go-version: [ "1.18", "1.19", "1.20", "1.21", "1.22", "1.23" ]
+        os: [ "ubuntu-latest" ]
+        os-label: [ "Ubuntu" ]
+        include:
+          - { sub-module: "web-oauth", go-version: "1.18", os: "windows-latest", os-label: "Windows" }
+          - { sub-module: "web-oauth", go-version: "1.18", os: "macos-latest", os-label: "macOS" }
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Install dependencies
+        run: |
+          cd "go/${{ matrix.sub-module }}"
+          go mod download
+          go install mvdan.cc/gofumpt@v0.5.0
+      - name: Format Check
+        if: runner.os != 'Windows'
+        run: |
+          cd "go/${{ matrix.sub-module }}"
+          if ! test -z "$(gofumpt -d -e . | tee /dev/stderr)"; then
+            echo "❗️ gofumpt check failed"
+            exit 1
+          fi
+      - name: Build & Test
+        run: |
+          cd "go/${{ matrix.sub-module }}"
+          go vet ./...
+          go build ./...
+          go test ./...

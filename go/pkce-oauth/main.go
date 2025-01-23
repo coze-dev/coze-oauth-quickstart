@@ -34,9 +34,7 @@ type TokenResponse struct {
 	ExpiresIn    string `json:"expires_in"`
 }
 
-var (
-	store = sessions.NewCookieStore([]byte("secret-key"))
-)
+var store = sessions.NewCookieStore([]byte("secret-key"))
 
 func loadConfig() (*Config, error) {
 	configFile, err := os.ReadFile(CozeOAuthConfigPath)
