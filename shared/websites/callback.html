@@ -27,10 +27,49 @@
         .card-body {
             padding: 3rem 2rem;
         }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 0 auto 1.5rem;
+        }
         .logo {
             width: 64px;
             height: 64px;
-            margin: 0 auto 1.5rem;
+        }
+        .user-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+        }
+        .user-info-tooltip {
+            position: absolute;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0.5rem;
+            display: none;
+            z-index: 1000;
+        }
+        .user-info-tooltip.show {
+            display: block;
+        }
+        .user-info-item {
+            margin: 0.25rem 0;
+            font-size: 0.875rem;
+            color: #333;
+        }
+        .user-info-label {
+            color: #666;
+            margin-right: 0.5rem;
         }
         .token-section {
             background-color: #f8f9ff;
@@ -150,9 +189,11 @@
         <div class="card">
             <div class="card-body">
                 <div class="text-center">
-                    <a href="{{coze_www_base}}" target="_blank">
-                        <img src="/assets/coze.png" alt="Coze Logo" class="logo">
-                    </a>
+                    <div class="logo-section" id="logoSection">
+                        <a href="{{coze_www_base}}" target="_blank">
+                            <img src="/assets/coze.png" alt="Coze Logo" class="logo">
+                        </a>
+                    </div>
                     <div class="status-bar"></div>
                     <h2 class="title">Authorization Successful</h2>
                     <p class="info-text">You have successfully authorized the application. Here's your authorization information:</p>
@@ -201,6 +242,7 @@
                 // 隐藏 refresh token 行
                 document.querySelector('.refresh-token-row').style.display = 'none';
             }
+            fetchUserInfo();
         });
 
         function showMessage(message, isSuccess = true) {
@@ -270,6 +312,65 @@
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
             });
+        }
+
+        // 获取用户信息并展示
+        async function fetchUserInfo() {
+            const accessToken = document.getElementById('access_token').textContent;
+            const refreshTokenEle = document.getElementById('refresh_token');
+            const isJWT = !refreshTokenEle || !refreshTokenEle.textContent.trim();
+            
+            if (isJWT) {
+                return; // JWT 模式不请求用户信息
+            }
+
+            try {
+                const response = await fetch(`/users_me?access_token=${accessToken}`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user info');
+                }
+
+                const userData = await response.json();
+                
+                if (!userData.user_id) {
+                    return; // 如果没有用户ID，不展示用户信息
+                }
+
+                // 创建用户头像和信息元素
+                const userAvatarContainer = document.createElement('div');
+                userAvatarContainer.style.position = 'relative';
+                
+                const userAvatar = document.createElement('img');
+                userAvatar.src = userData.avatar_url;
+                userAvatar.alt = 'User Avatar';
+                userAvatar.className = 'user-avatar';
+
+                const userInfoTooltip = document.createElement('div');
+                userInfoTooltip.className = 'user-info-tooltip';
+                userInfoTooltip.innerHTML = `
+                    <div class="user-info-item"><span class="user-info-label">User ID:</span>${userData.user_id}</div>
+                    <div class="user-info-item"><span class="user-info-label">Username:</span>${userData.user_name}</div>
+                    <div class="user-info-item"><span class="user-info-label">Nickname:</span>${userData.nick_name}</div>
+                `;
+
+                userAvatarContainer.appendChild(userAvatar);
+                userAvatarContainer.appendChild(userInfoTooltip);
+
+                // 添加鼠标事件
+                userAvatar.addEventListener('mouseenter', () => {
+                    userInfoTooltip.classList.add('show');
+                });
+                userAvatar.addEventListener('mouseleave', () => {
+                    userInfoTooltip.classList.remove('show');
+                });
+
+                // 将用户头像添加到logo区域
+                const logoSection = document.getElementById('logoSection');
+                logoSection.appendChild(userAvatarContainer);
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
         }
     </script>
 </body>
