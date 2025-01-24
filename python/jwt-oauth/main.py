@@ -25,7 +25,7 @@ def load_app_config(config_path) -> dict:
 def load_coze_oauth_app(config_path) -> JWTOAuthApp:
     try:
         with open(config_path, "r") as file:
-            config = file.read()
+            config = json.loads(file.read())
         return load_oauth_app_from_config(config)  # type: ignore
     except FileNotFoundError:
         raise Exception(

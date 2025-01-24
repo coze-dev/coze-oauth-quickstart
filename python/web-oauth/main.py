@@ -2,7 +2,7 @@ import json
 import secrets
 from datetime import datetime
 
-from cozepy import load_oauth_app_from_config, WebOAuthApp
+from cozepy import load_oauth_app_from_config, WebOAuthApp, Coze, TokenAuth
 from flask import Flask, redirect, request, session
 
 app = Flask(
@@ -25,7 +25,7 @@ def load_app_config(config_path) -> dict:
 def load_coze_oauth_app(config_path) -> WebOAuthApp:
     try:
         with open(config_path, "r") as file:
-            config = file.read()
+            config = json.loads(file.read())
         return load_oauth_app_from_config(config)  # type: ignore
     except FileNotFoundError:
         raise Exception(
@@ -48,6 +48,7 @@ def render_template(template: str, kwargs: dict) -> str:
     if not kwargs:
         kwargs = {}
     kwargs["coze_www_base"] = app_config["coze_www_base"]
+    kwargs["coze_api_base"] = app_config["coze_api_base"]
     template = read_html_template(template)
     for key, value in kwargs.items():
         template = template.replace(f"{{{{{key}}}}}", str(value))
@@ -180,6 +181,27 @@ def refresh_token():
         }
     except Exception as e:
         return {"error": f"Failed to refresh token: {str(e)}"}, 500
+
+
+@app.route("/users_me")
+def users_me():
+    access_token = request.args.get("access_token")
+    if not access_token:
+        return render_template(
+            "websites/error.html", {"error": "Access token is required"}
+        )
+    coze = Coze(auth=TokenAuth(access_token), base_url=app_config["coze_api_base"])
+
+    try:
+        user = coze.users.me()
+        return {
+            "user_id": user.user_id,
+            "user_name": user.user_name,
+            "nick_name": user.nick_name,
+            "avatar_url": user.avatar_url,
+        }
+    except Exception as e:
+        return {"error": f"Failed to get user info: {str(e)}"}, 500
 
 
 if __name__ == "__main__":
