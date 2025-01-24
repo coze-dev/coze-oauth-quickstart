@@ -127,6 +127,34 @@
         .token-value {
             flex: 1;
             color: #111;
+            position: relative;
+        }
+        .masked-text {
+            font-family: monospace;
+            letter-spacing: 2px;
+            display: block;
+            padding-right: 140px; /* 为两个按钮留出空间 */
+            word-break: break-all;
+        }
+        .token-actions {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 4px;
+        }
+        .toggle-visibility, .token-copy-btn {
+            background: none;
+            border: none;
+            color: #6366f1;
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .toggle-visibility:hover, .token-copy-btn:hover {
+            background-color: #e8eeff;
         }
         .status-bar {
             width: 80px;
@@ -203,7 +231,6 @@
                         <h3>Access Token</h3>
                         <div>
                             <button class="copy-btn me-2" onclick="refreshToken()" id="refreshBtn">Refresh Token</button>
-                            <button class="copy-btn" onclick="copyToken('access_token')">Copy Token</button>
                         </div>
                     </div>
                     <div class="token-content">
@@ -213,11 +240,27 @@
                         </div>
                         <div class="token-row">
                             <span class="token-label">Access Token:</span>
-                            <span class="token-value" id="access_token">{{access_token}}</span>
+                            <span class="token-value">
+                                <span id="access_token" data-value="{{access_token}}">
+                                    <span class="masked-text">********************************</span>
+                                </span>
+                                <div class="token-actions">
+                                    <button class="toggle-visibility" onclick="toggleVisibility('access_token')">Show</button>
+                                    <button class="token-copy-btn" onclick="copyToken('access_token')">Copy</button>
+                                </div>
+                            </span>
                         </div>
                         <div class="token-row refresh-token-row">
                             <span class="token-label">Refresh Token:</span>
-                            <span class="token-value" id="refresh_token">{{refresh_token}}</span>
+                            <span class="token-value">
+                                <span id="refresh_token" data-value="{{refresh_token}}">
+                                    <span class="masked-text">********************************</span>
+                                </span>
+                                <div class="token-actions">
+                                    <button class="toggle-visibility" onclick="toggleVisibility('refresh_token')">Show</button>
+                                    <button class="token-copy-btn" onclick="copyToken('refresh_token')">Copy</button>
+                                </div>
+                            </span>
                         </div>
                         <div class="token-row">
                             <span class="token-label">Expire at:</span>
@@ -270,7 +313,7 @@
                     });
                 } else {
                     // 普通 OAuth: 使用 refresh token 刷新
-                    const refreshToken = document.getElementById('refresh_token').textContent;
+                    const refreshToken = document.getElementById('refresh_token').getAttribute('data-value').trim();
                     response = await fetch('/refresh_token', {
                         method: 'POST',
                         headers: {
@@ -287,9 +330,14 @@
                 const data = await response.json();
                 
                 // 更新页面上的 token
-                document.getElementById('access_token').textContent = data.access_token;
+                const accessTokenEle = document.getElementById('access_token');
+                accessTokenEle.setAttribute('data-value', data.access_token);
+                accessTokenEle.querySelector('.masked-text').textContent = '********************************';
+                
                 if (data.refresh_token) {
-                    document.getElementById('refresh_token').textContent = data.refresh_token;
+                    const refreshTokenEle = document.getElementById('refresh_token');
+                    refreshTokenEle.setAttribute('data-value', data.refresh_token);
+                    refreshTokenEle.querySelector('.masked-text').textContent = '********************************';
                 }
                 
                 showMessage(isJWT ? 'New token generated successfully!' : 'Token refreshed successfully!');
@@ -301,16 +349,13 @@
 
         function copyToken(elementId) {
             const tokenElement = document.getElementById(elementId);
-            const tokenText = tokenElement.textContent;
+            const tokenText = tokenElement.getAttribute('data-value');
             
             navigator.clipboard.writeText(tokenText).then(() => {
-                const successElement = document.getElementById('copySuccess');
-                successElement.classList.add('show');
-                setTimeout(() => {
-                    successElement.classList.remove('show');
-                }, 2000);
+                showMessage('Token copied to clipboard!');
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
+                showMessage('Failed to copy token', false);
             });
         }
 
@@ -370,6 +415,22 @@
                 logoSection.appendChild(userAvatarContainer);
             } catch (error) {
                 console.error('Error fetching user info:', error);
+            }
+        }
+
+        // 添加 token 显示/隐藏功能
+        function toggleVisibility(elementId) {
+            const element = document.getElementById(elementId);
+            const realValue = element.getAttribute('data-value');
+            const button = element.parentElement.querySelector('.toggle-visibility');
+            const isVisible = element.querySelector('.masked-text').textContent !== '********************************';
+            
+            if (isVisible) {
+                element.querySelector('.masked-text').textContent = '********************************';
+                button.textContent = 'Show';
+            } else {
+                element.querySelector('.masked-text').textContent = realValue;
+                button.textContent = 'Hide';
             }
         }
     </script>
