@@ -95,17 +95,14 @@ func main() {
 	fmt.Printf("[device-oauth] expires_in: %d (%s)\n", resp.ExpiresIn, expiresStr)
 
 	// Get user info
-	usersClient, err := coze.NewUsersClient(
-		coze.WithUsersBaseURL(rawConfig.CozeAPIBase),
-		coze.WithUsersHttpClient(&http.Client{
-			Transport: &tokenTransport{accessToken: resp.AccessToken},
-		}),
+	client := coze.NewCozeAPI(coze.NewTokenAuth(resp.AccessToken),
+		coze.WithBaseURL(rawConfig.CozeAPIBase),
 	)
 	if err != nil {
 		log.Fatalf("Failed to create users client: %v", err)
 	}
 
-	user, err := usersClient.Me(context.Background())
+	user, err := client.Users.Me(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to get user info: %v", err)
 	}
