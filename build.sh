@@ -17,7 +17,7 @@ for lang in python go java nodejs; do
             cp -f shared/quickstart.md "$dir/quickstart.md"
 
             # Copy bootstrap files (sh, bat, ps1)
-            for ext in sh bat ps1; do
+            for ext in sh ps1; do
                 source_bootstrap_file="$lang/bootstrap.$ext"
                 if [ -f "$source_bootstrap_file" ]; then
                     cp -f "$source_bootstrap_file" "$dir/bootstrap.$ext"
