@@ -1,6 +1,6 @@
 Run this command for linux/macos:
 ```bash
-chmod +x bootstrap.sh && ./bootstrap.sh
+bash bootstrap.sh
 ```
 
 Run this command for windows:
