@@ -3,7 +3,7 @@ module github.com/coze-dev/coze-oauth-quickstart/go/pkce-oauth
 go 1.18
 
 require (
-	github.com/coze-dev/coze-go v0.0.0-20250115094839-23bd27bd6561
+	github.com/coze-dev/coze-go v0.0.0-20250205074941-5c21d40b5904
 	github.com/gorilla/sessions v1.2.2
 )
 

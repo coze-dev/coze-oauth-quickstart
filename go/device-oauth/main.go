@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -13,32 +14,40 @@ import (
 
 const CozeOAuthConfigPath = "coze_oauth_config.json"
 
-type Config struct {
-	ClientType  string `json:"client_type"`
-	ClientID    string `json:"client_id"`
-	CozeDomain  string `json:"coze_www_base"`
-	CozeAPIBase string `json:"coze_api_base"`
+// tokenTransport is an http.RoundTripper that adds an Authorization header
+type tokenTransport struct {
+	accessToken string
 }
 
-func loadConfig() (*Config, error) {
+func (t *tokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", "Bearer "+t.accessToken)
+	return http.DefaultTransport.RoundTrip(req)
+}
+
+func loadConfig() (*coze.DeviceOAuthClient, *coze.OAuthConfig, error) {
 	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("coze_oauth_config.json not found in current directory")
+			return nil, nil, fmt.Errorf("coze_oauth_config.json not found in current directory")
 		}
-		return nil, fmt.Errorf("failed to read config file: %v", err)
+		return nil, nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	var config Config
-	if err := json.Unmarshal(configFile, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	var oauthConfig coze.OAuthConfig
+	if err := json.Unmarshal(configFile, &oauthConfig); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse config file: %v", err)
 	}
 
-	if config.ClientType != "device" {
-		return nil, fmt.Errorf("invalid client type: %s. expected: device", config.ClientType)
+	oauth, err := coze.LoadOAuthAppFromConfig(&oauthConfig)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to load OAuth config: %v", err)
 	}
 
-	return &config, nil
+	deviceClient, ok := oauth.(*coze.DeviceOAuthClient)
+	if !ok {
+		return nil, nil, fmt.Errorf("invalid OAuth client type: expected Device client")
+	}
+	return deviceClient, &oauthConfig, nil
 }
 
 func timestampToDateTime(timestamp int64) string {
@@ -49,17 +58,9 @@ func timestampToDateTime(timestamp int64) string {
 func main() {
 	log.SetFlags(0)
 
-	config, err := loadConfig()
+	oauth, oauthConfig, err := loadConfig()
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
-	}
-
-	oauth, err := coze.NewDeviceOAuthClient(
-		config.ClientID,
-		coze.WithAuthBaseURL(config.CozeAPIBase),
-	)
-	if err != nil {
-		log.Fatalf("Error creating device OAuth client: %v\n", err)
 	}
 
 	ctx := context.Background()
@@ -83,4 +84,22 @@ func main() {
 	fmt.Printf("[device-oauth] refresh_token: %s\n", resp.RefreshToken)
 	expiresStr := timestampToDateTime(resp.ExpiresIn)
 	fmt.Printf("[device-oauth] expires_in: %d (%s)\n", resp.ExpiresIn, expiresStr)
+
+	// Get user info
+	client := coze.NewCozeAPI(coze.NewTokenAuth(resp.AccessToken),
+		coze.WithBaseURL(oauthConfig.CozeAPIBase),
+	)
+	if err != nil {
+		log.Fatalf("Failed to create users client: %v", err)
+	}
+
+	user, err := client.Users.Me(context.Background())
+	if err != nil {
+		log.Fatalf("Failed to get user info: %v", err)
+	}
+
+	fmt.Printf("[user_info] user_id: %s\n", user.UserID)
+	fmt.Printf("[user_info] user_name: %s\n", user.UserName)
+	fmt.Printf("[user_info] nick_name: %s\n", user.NickName)
+	fmt.Printf("[user_info] avatar_url: %s\n", user.AvatarURL)
 }
