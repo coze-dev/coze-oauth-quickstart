@@ -361,7 +361,7 @@
 
         // 获取用户信息并展示
         async function fetchUserInfo() {
-            const accessToken = document.getElementById('access_token').textContent;
+            const accessToken = document.getElementById('access_token').getAttribute('data-value');
             const refreshTokenEle = document.getElementById('refresh_token');
             const isJWT = !refreshTokenEle || !refreshTokenEle.textContent.trim();
             

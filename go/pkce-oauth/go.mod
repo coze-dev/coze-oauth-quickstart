@@ -12,3 +12,5 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 )
+
+replace github.com/coze-dev/coze-go => /Users/bytedance/go/src/github.com/coze-dev/coze-go
