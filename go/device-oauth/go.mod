@@ -1,4 +1,4 @@
-module github.com/coze-dev/coze-oauth-quickstart/go/device-oauth/src
+module github.com/coze-dev/coze-oauth-quickstart/go/device-oauth
 
 go 1.18
 
