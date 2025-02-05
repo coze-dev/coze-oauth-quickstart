@@ -48,16 +48,21 @@ func loadConfig() (*coze.PKCEOAuthClient, error) {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	oauth, err := coze.LoadOAuthAppFromConfig(configFile)
+	var oauthConfig coze.OAuthConfig
+	if err := json.Unmarshal(configFile, &oauthConfig); err != nil {
+		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	}
+
+	oauth, err := coze.LoadOAuthAppFromConfig(oauthConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load OAuth config: %v", err)
 	}
 
-	config, ok := oauth.(*coze.PKCEOAuthClient)
+	pkceClient, ok := oauth.(*coze.PKCEOAuthClient)
 	if !ok {
 		return nil, fmt.Errorf("invalid OAuth client type: expected PKCE client")
 	}
-	return config, nil
+	return pkceClient, nil
 }
 
 func timestampToDateTime(timestamp int64) string {

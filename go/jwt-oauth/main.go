@@ -33,16 +33,21 @@ func loadConfig() (*coze.JWTOAuthClient, error) {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	oauth, err := coze.LoadOAuthAppFromConfig(configFile)
+	var oauthConfig coze.OAuthConfig
+	if err := json.Unmarshal(configFile, &oauthConfig); err != nil {
+		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	}
+
+	oauth, err := coze.LoadOAuthAppFromConfig(oauthConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load OAuth config: %v", err)
 	}
 
-	config, ok := oauth.(*coze.JWTOAuthClient)
+	jwtClient, ok := oauth.(*coze.JWTOAuthClient)
 	if !ok {
 		return nil, fmt.Errorf("invalid OAuth client type: expected JWT client")
 	}
-	return config, nil
+	return jwtClient, nil
 }
 
 func timestampToDateTime(timestamp int64) string {
