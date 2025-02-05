@@ -5,10 +5,10 @@ bash bootstrap.sh
 
 Run this command for windows:
 ```bash
-bootstrap.bat
+.\bootstrap.bat
 ```
 
 Run this command for windows powershell:
 ```powershell
-bootstrap.ps1
+.\bootstrap.ps1
 ```
