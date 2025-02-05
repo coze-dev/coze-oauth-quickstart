@@ -39,30 +39,30 @@ func (t *tokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-func loadConfig() (*coze.PKCEOAuthClient, error) {
+func loadConfig() (*coze.PKCEOAuthClient, *coze.OAuthConfig, error) {
 	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("coze_oauth_config.json not found in current directory")
+			return nil, nil, fmt.Errorf("coze_oauth_config.json not found in current directory")
 		}
-		return nil, fmt.Errorf("failed to read config file: %v", err)
+		return nil, nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
 	var oauthConfig coze.OAuthConfig
 	if err := json.Unmarshal(configFile, &oauthConfig); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %v", err)
+		return nil, nil, fmt.Errorf("failed to parse config file: %v", err)
 	}
 
 	oauth, err := coze.LoadOAuthAppFromConfig(&oauthConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load OAuth config: %v", err)
+		return nil, nil, fmt.Errorf("failed to load OAuth config: %v", err)
 	}
 
 	pkceClient, ok := oauth.(*coze.PKCEOAuthClient)
 	if !ok {
-		return nil, fmt.Errorf("invalid OAuth client type: expected PKCE client")
+		return nil, nil, fmt.Errorf("invalid OAuth client type: expected PKCE client")
 	}
-	return pkceClient, nil
+	return pkceClient, &oauthConfig, nil
 }
 
 func timestampToDateTime(timestamp int64) string {
@@ -87,30 +87,16 @@ func renderTemplate(template string, data map[string]interface{}) string {
 	return result
 }
 
-func handleError(w http.ResponseWriter, err error) {
+func handleError(w http.ResponseWriter, err error, oauthConfig *coze.OAuthConfig) {
 	template, parseErr := readHTMLTemplate("websites/error.html")
 	if parseErr != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	// Read config to get domain info
-	configFile, readErr := os.ReadFile(CozeOAuthConfigPath)
-	if readErr != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	var rawConfig struct {
-		CozeDomain string `json:"coze_www_base"`
-	}
-	if jsonErr := json.Unmarshal(configFile, &rawConfig); jsonErr != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
 	data := map[string]interface{}{
 		"error":         err.Error(),
-		"coze_www_base": rawConfig.CozeDomain,
+		"coze_www_base": oauthConfig.CozeWWWBase,
 	}
 
 	w.WriteHeader(http.StatusInternalServerError)
@@ -121,24 +107,9 @@ func handleError(w http.ResponseWriter, err error) {
 func main() {
 	log.SetFlags(0)
 
-	oauth, err := loadConfig()
+	oauth, oauthConfig, err := loadConfig()
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
-	}
-
-	// Read raw config for UI display
-	configFile, err := os.ReadFile(CozeOAuthConfigPath)
-	if err != nil {
-		log.Fatalf("Error reading config file: %v", err)
-	}
-	var rawConfig struct {
-		ClientType  string `json:"client_type"`
-		ClientID    string `json:"client_id"`
-		CozeAPIBase string `json:"coze_api_base"`
-		CozeDomain  string `json:"coze_www_base"`
-	}
-	if err := json.Unmarshal(configFile, &rawConfig); err != nil {
-		log.Fatalf("Error parsing config file: %v", err)
 	}
 
 	fs := http.FileServer(http.Dir("assets"))
@@ -152,13 +123,14 @@ func main() {
 
 		template, err := readHTMLTemplate("websites/index.html")
 		if err != nil {
-			handleError(w, fmt.Errorf("failed to read template: %v", err))
+			handleError(w, fmt.Errorf("failed to read template: %v", err), oauthConfig)
 			return
 		}
 
 		data := map[string]interface{}{
-			"client_type": rawConfig.ClientType,
-			"client_id":   rawConfig.ClientID,
+			"client_type":   oauthConfig.ClientType,
+			"client_id":     oauthConfig.ClientID,
+			"coze_www_base": oauthConfig.CozeWWWBase,
 		}
 
 		result := renderTemplate(template, data)
@@ -172,7 +144,7 @@ func main() {
 			State:       "random",
 		})
 		if err != nil {
-			handleError(w, fmt.Errorf("failed to get OAuth URL: %v", err))
+			handleError(w, fmt.Errorf("failed to get OAuth URL: %v", err), oauthConfig)
 			return
 		}
 
@@ -186,14 +158,14 @@ func main() {
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
 		if code == "" {
-			handleError(w, fmt.Errorf("authorization failed: no authorization code received"))
+			handleError(w, fmt.Errorf("authorization failed: no authorization code received"), oauthConfig)
 			return
 		}
 
 		session, _ := store.Get(r, "pkce-session")
 		codeVerifier, ok := session.Values["code_verifier"].(string)
 		if !ok {
-			handleError(w, fmt.Errorf("authorization failed: no code verifier found"))
+			handleError(w, fmt.Errorf("authorization failed: no code verifier found"), oauthConfig)
 			return
 		}
 
@@ -204,7 +176,7 @@ func main() {
 			CodeVerifier: codeVerifier,
 		})
 		if err != nil {
-			handleError(w, fmt.Errorf("failed to get access token: %v", err))
+			handleError(w, fmt.Errorf("failed to get access token: %v", err), oauthConfig)
 			return
 		}
 
@@ -220,7 +192,7 @@ func main() {
 
 		template, err := readHTMLTemplate("websites/callback.html")
 		if err != nil {
-			handleError(w, fmt.Errorf("failed to read template: %v", err))
+			handleError(w, fmt.Errorf("failed to read template: %v", err), oauthConfig)
 			return
 		}
 
@@ -229,7 +201,7 @@ func main() {
 			"access_token":  resp.AccessToken,
 			"refresh_token": resp.RefreshToken,
 			"expires_in":    expiresStr,
-			"coze_www_base": rawConfig.CozeDomain,
+			"coze_www_base": oauthConfig.CozeWWWBase,
 		}
 
 		result := renderTemplate(template, data)
@@ -285,15 +257,15 @@ func main() {
 	http.HandleFunc("/users_me", func(w http.ResponseWriter, r *http.Request) {
 		accessToken := r.URL.Query().Get("access_token")
 		if accessToken == "" {
-			handleError(w, fmt.Errorf("access token is required"))
+			handleError(w, fmt.Errorf("access token is required"), oauthConfig)
 			return
 		}
 
-		client := coze.NewCozeAPI(coze.NewTokenAuth(accessToken), coze.WithBaseURL(rawConfig.CozeAPIBase))
+		client := coze.NewCozeAPI(coze.NewTokenAuth(accessToken), coze.WithBaseURL(oauthConfig.CozeAPIBase))
 
 		user, err := client.Users.Me(context.Background())
 		if err != nil {
-			handleError(w, fmt.Errorf("failed to get user info: %v", err))
+			handleError(w, fmt.Errorf("failed to get user info: %v", err), oauthConfig)
 			return
 		}
 
@@ -306,8 +278,8 @@ func main() {
 		})
 	})
 
-	log.Printf("Server starting on http://127.0.0.1:8080 (API Base: %s, Client Type: %s, Client ID: %s)\n",
-		rawConfig.CozeAPIBase, rawConfig.ClientType, rawConfig.ClientID)
+	log.Printf("\nServer starting on http://127.0.0.1:8080 (API Base: %s, Client Type: %s, Client ID: %s)\n",
+		oauthConfig.CozeAPIBase, oauthConfig.ClientType, oauthConfig.ClientID)
 	if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
