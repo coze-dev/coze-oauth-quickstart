@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -12,6 +13,16 @@ import (
 )
 
 const CozeOAuthConfigPath = "coze_oauth_config.json"
+
+// tokenTransport is an http.RoundTripper that adds an Authorization header
+type tokenTransport struct {
+	accessToken string
+}
+
+func (t *tokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", "Bearer "+t.accessToken)
+	return http.DefaultTransport.RoundTrip(req)
+}
 
 func loadConfig() (*coze.DeviceOAuthClient, error) {
 	configFile, err := os.ReadFile(CozeOAuthConfigPath)
@@ -82,4 +93,25 @@ func main() {
 	fmt.Printf("[device-oauth] refresh_token: %s\n", resp.RefreshToken)
 	expiresStr := timestampToDateTime(resp.ExpiresIn)
 	fmt.Printf("[device-oauth] expires_in: %d (%s)\n", resp.ExpiresIn, expiresStr)
+
+	// Get user info
+	usersClient, err := coze.NewUsersClient(
+		coze.WithUsersBaseURL(rawConfig.CozeAPIBase),
+		coze.WithUsersHttpClient(&http.Client{
+			Transport: &tokenTransport{accessToken: resp.AccessToken},
+		}),
+	)
+	if err != nil {
+		log.Fatalf("Failed to create users client: %v", err)
+	}
+
+	user, err := usersClient.Me(context.Background())
+	if err != nil {
+		log.Fatalf("Failed to get user info: %v", err)
+	}
+
+	fmt.Printf("[user_info] user_id: %s\n", user.UserID)
+	fmt.Printf("[user_info] user_name: %s\n", user.UserName)
+	fmt.Printf("[user_info] nick_name: %s\n", user.NickName)
+	fmt.Printf("[user_info] avatar_url: %s\n", user.AvatarURL)
 }

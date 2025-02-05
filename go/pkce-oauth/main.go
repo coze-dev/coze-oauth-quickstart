@@ -29,6 +29,16 @@ type TokenResponse struct {
 
 var store = sessions.NewCookieStore([]byte("secret-key"))
 
+// tokenTransport is an http.RoundTripper that adds an Authorization header
+type tokenTransport struct {
+	accessToken string
+}
+
+func (t *tokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", "Bearer "+t.accessToken)
+	return http.DefaultTransport.RoundTrip(req)
+}
+
 func loadConfig() (*coze.PKCEOAuthClient, error) {
 	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
@@ -264,6 +274,30 @@ func main() {
 			"access_token":  resp.AccessToken,
 			"refresh_token": resp.RefreshToken,
 			"expires_in":    expiresStr,
+		})
+	})
+
+	http.HandleFunc("/users_me", func(w http.ResponseWriter, r *http.Request) {
+		accessToken := r.URL.Query().Get("access_token")
+		if accessToken == "" {
+			handleError(w, fmt.Errorf("access token is required"))
+			return
+		}
+
+		client := coze.NewCozeAPI(coze.NewTokenAuth(accessToken), coze.WithBaseURL(rawConfig.CozeAPIBase))
+
+		user, err := client.Users.Me(context.Background())
+		if err != nil {
+			handleError(w, fmt.Errorf("failed to get user info: %v", err))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"user_id":    user.UserID,
+			"user_name":  user.UserName,
+			"nick_name":  user.NickName,
+			"avatar_url": user.AvatarURL,
 		})
 	})
 
