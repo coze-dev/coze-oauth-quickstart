@@ -20,14 +20,6 @@ const (
 	RedirectURI         = "http://127.0.0.1:8080/callback"
 )
 
-type Config struct {
-	ClientType   string `json:"client_type"`
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	CozeDomain   string `json:"coze_www_base"`
-	CozeAPIBase  string `json:"coze_api_base"`
-}
-
 type TokenResponse struct {
 	TokenType    string `json:"token_type"`
 	AccessToken  string `json:"access_token"`
@@ -37,7 +29,7 @@ type TokenResponse struct {
 
 var store = sessions.NewCookieStore([]byte("secret-key"))
 
-func loadConfig() (*Config, error) {
+func loadConfig() (*coze.WebOAuthClient, error) {
 	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -46,16 +38,16 @@ func loadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	var config Config
-	if err := json.Unmarshal(configFile, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	oauth, err := coze.LoadOAuthAppFromConfig(configFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load OAuth config: %v", err)
 	}
 
-	if config.ClientType != "web" {
-		return nil, fmt.Errorf("invalid client type: %s, expect web", config.ClientType)
+	config, ok := oauth.(*coze.WebOAuthClient)
+	if !ok {
+		return nil, fmt.Errorf("invalid OAuth client type: expected Web client")
 	}
-
-	return &config, nil
+	return config, nil
 }
 
 func timestampToDateTime(timestamp int64) string {
@@ -80,16 +72,30 @@ func renderTemplate(template string, data map[string]interface{}) string {
 	return result
 }
 
-func handleError(w http.ResponseWriter, config *Config, err error) {
+func handleError(w http.ResponseWriter, err error) {
 	template, parseErr := readHTMLTemplate("websites/error.html")
 	if parseErr != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
+	// Read config to get domain info
+	configFile, readErr := os.ReadFile(CozeOAuthConfigPath)
+	if readErr != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	var rawConfig struct {
+		CozeDomain string `json:"coze_www_base"`
+	}
+	if jsonErr := json.Unmarshal(configFile, &rawConfig); jsonErr != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	data := map[string]interface{}{
 		"error":         err.Error(),
-		"coze_www_base": config.CozeDomain,
+		"coze_www_base": rawConfig.CozeDomain,
 	}
 
 	w.WriteHeader(http.StatusInternalServerError)
@@ -100,14 +106,24 @@ func handleError(w http.ResponseWriter, config *Config, err error) {
 func main() {
 	log.SetFlags(0)
 
-	config, err := loadConfig()
+	oauth, err := loadConfig()
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	oauth, err := coze.NewWebOAuthClient(config.ClientID, config.ClientSecret, coze.WithAuthBaseURL(config.CozeAPIBase))
+	// Read raw config for UI display
+	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
-		log.Fatalf("Error creating OAuth client: %v", err)
+		log.Fatalf("Error reading config file: %v", err)
+	}
+	var rawConfig struct {
+		ClientType  string `json:"client_type"`
+		ClientID    string `json:"client_id"`
+		CozeAPIBase string `json:"coze_api_base"`
+		CozeDomain  string `json:"coze_www_base"`
+	}
+	if err := json.Unmarshal(configFile, &rawConfig); err != nil {
+		log.Fatalf("Error parsing config file: %v", err)
 	}
 
 	fs := http.FileServer(http.Dir("assets"))
@@ -121,13 +137,13 @@ func main() {
 
 		template, err := readHTMLTemplate("websites/index.html")
 		if err != nil {
-			handleError(w, config, fmt.Errorf("failed to read template: %v", err))
+			handleError(w, fmt.Errorf("failed to read template: %v", err))
 			return
 		}
 
 		data := map[string]interface{}{
-			"client_type": config.ClientType,
-			"client_id":   config.ClientID,
+			"client_type": rawConfig.ClientType,
+			"client_id":   rawConfig.ClientID,
 		}
 
 		result := renderTemplate(template, data)
@@ -146,7 +162,7 @@ func main() {
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
 		if code == "" {
-			handleError(w, config, fmt.Errorf("authorization failed: no authorization code received"))
+			handleError(w, fmt.Errorf("authorization failed: no authorization code received"))
 			return
 		}
 
@@ -156,12 +172,12 @@ func main() {
 			RedirectURI: RedirectURI,
 		})
 		if err != nil {
-			handleError(w, config, fmt.Errorf("failed to get access token: %v", err))
+			handleError(w, fmt.Errorf("failed to get access token: %v", err))
 			return
 		}
 
 		// Store token in session
-		session, _ := store.Get(r, fmt.Sprintf("oauth_token_%s", config.ClientID))
+		session, _ := store.Get(r, "oauth_token")
 		session.Values["token_type"] = "Bearer"
 		session.Values["access_token"] = resp.AccessToken
 		session.Values["refresh_token"] = resp.RefreshToken
@@ -172,7 +188,7 @@ func main() {
 
 		template, err := readHTMLTemplate("websites/callback.html")
 		if err != nil {
-			handleError(w, config, fmt.Errorf("failed to read template: %v", err))
+			handleError(w, fmt.Errorf("failed to read template: %v", err))
 			return
 		}
 
@@ -181,7 +197,7 @@ func main() {
 			"access_token":  resp.AccessToken,
 			"refresh_token": resp.RefreshToken,
 			"expires_in":    expiresStr,
-			"coze_www_base": config.CozeDomain,
+			"coze_www_base": rawConfig.CozeDomain,
 		}
 
 		result := renderTemplate(template, data)
@@ -216,7 +232,7 @@ func main() {
 		}
 
 		// Update session
-		session, _ := store.Get(r, fmt.Sprintf("oauth_token_%s", config.ClientID))
+		session, _ := store.Get(r, "oauth_token")
 		session.Values["token_type"] = "Bearer"
 		session.Values["access_token"] = resp.AccessToken
 		session.Values["refresh_token"] = resp.RefreshToken
@@ -235,7 +251,7 @@ func main() {
 	})
 
 	log.Printf("Server starting on http://127.0.0.1:8080 (API Base: %s, Client Type: %s, Client ID: %s)\n",
-		config.CozeAPIBase, config.ClientType, config.ClientID)
+		rawConfig.CozeAPIBase, rawConfig.ClientType, rawConfig.ClientID)
 	if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}

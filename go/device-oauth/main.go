@@ -13,14 +13,7 @@ import (
 
 const CozeOAuthConfigPath = "coze_oauth_config.json"
 
-type Config struct {
-	ClientType  string `json:"client_type"`
-	ClientID    string `json:"client_id"`
-	CozeDomain  string `json:"coze_www_base"`
-	CozeAPIBase string `json:"coze_api_base"`
-}
-
-func loadConfig() (*Config, error) {
+func loadConfig() (*coze.DeviceOAuthClient, error) {
 	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -29,16 +22,16 @@ func loadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	var config Config
-	if err := json.Unmarshal(configFile, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	oauth, err := coze.LoadOAuthAppFromConfig(configFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load OAuth config: %v", err)
 	}
 
-	if config.ClientType != "device" {
-		return nil, fmt.Errorf("invalid client type: %s. expected: device", config.ClientType)
+	config, ok := oauth.(*coze.DeviceOAuthClient)
+	if !ok {
+		return nil, fmt.Errorf("invalid OAuth client type: expected Device client")
 	}
-
-	return &config, nil
+	return config, nil
 }
 
 func timestampToDateTime(timestamp int64) string {
@@ -49,17 +42,23 @@ func timestampToDateTime(timestamp int64) string {
 func main() {
 	log.SetFlags(0)
 
-	config, err := loadConfig()
+	oauth, err := loadConfig()
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	oauth, err := coze.NewDeviceOAuthClient(
-		config.ClientID,
-		coze.WithAuthBaseURL(config.CozeAPIBase),
-	)
+	// Read raw config for logging
+	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
-		log.Fatalf("Error creating device OAuth client: %v\n", err)
+		log.Fatalf("Error reading config file: %v", err)
+	}
+	var rawConfig struct {
+		ClientType  string `json:"client_type"`
+		ClientID    string `json:"client_id"`
+		CozeAPIBase string `json:"coze_api_base"`
+	}
+	if err := json.Unmarshal(configFile, &rawConfig); err != nil {
+		log.Fatalf("Error parsing config file: %v", err)
 	}
 
 	ctx := context.Background()

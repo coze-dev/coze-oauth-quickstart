@@ -17,15 +17,6 @@ import (
 
 const CozeOAuthConfigPath = "coze_oauth_config.json"
 
-type Config struct {
-	ClientType  string `json:"client_type"`
-	ClientID    string `json:"client_id"`
-	PrivateKey  string `json:"private_key"`
-	PublicKeyID string `json:"public_key_id"`
-	CozeDomain  string `json:"coze_www_base"`
-	CozeAPIBase string `json:"coze_api_base"`
-}
-
 type TokenResponse struct {
 	TokenType    string `json:"token_type"`
 	AccessToken  string `json:"access_token"`
@@ -33,7 +24,7 @@ type TokenResponse struct {
 	ExpiresIn    string `json:"expires_in"`
 }
 
-func loadConfig() (*Config, error) {
+func loadConfig() (*coze.JWTOAuthClient, error) {
 	configFile, err := os.ReadFile(CozeOAuthConfigPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -42,16 +33,16 @@ func loadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	var config Config
-	if err := json.Unmarshal(configFile, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	oauth, err := coze.LoadOAuthAppFromConfig(configFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load OAuth config: %v", err)
 	}
 
-	if config.ClientType != "jwt" {
-		return nil, fmt.Errorf("invalid client type: %s. expected: jwt", config.ClientType)
+	config, ok := oauth.(*coze.JWTOAuthClient)
+	if !ok {
+		return nil, fmt.Errorf("invalid OAuth client type: expected JWT client")
 	}
-
-	return &config, nil
+	return config, nil
 }
 
 func timestampToDateTime(timestamp int64) string {
@@ -79,18 +70,9 @@ func renderTemplate(template string, data map[string]interface{}) string {
 func main() {
 	log.SetFlags(0)
 
-	config, err := loadConfig()
+	oauth, err := loadConfig()
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
-	}
-
-	oauth, err := coze.NewJWTOAuthClient(coze.NewJWTOAuthClientParam{
-		ClientID:      config.ClientID,
-		PublicKey:     config.PublicKeyID,
-		PrivateKeyPEM: config.PrivateKey,
-	}, coze.WithAuthBaseURL(config.CozeAPIBase))
-	if err != nil {
-		log.Fatalf("Error creating JWT OAuth client: %v\n", err)
 	}
 
 	listener, err := net.Listen("tcp", "127.0.0.1:8080")
@@ -114,10 +96,26 @@ func main() {
 			return
 		}
 
+		// Read config again to get client info
+		configFile, err := os.ReadFile(CozeOAuthConfigPath)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		var rawConfig struct {
+			ClientType string `json:"client_type"`
+			ClientID   string `json:"client_id"`
+			CozeDomain string `json:"coze_www_base"`
+		}
+		if err := json.Unmarshal(configFile, &rawConfig); err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
 		data := map[string]interface{}{
-			"client_type":   config.ClientType,
-			"client_id":     config.ClientID,
-			"coze_www_base": config.CozeDomain,
+			"client_type":   rawConfig.ClientType,
+			"client_id":     rawConfig.ClientID,
+			"coze_www_base": rawConfig.CozeDomain,
 		}
 
 		result := renderTemplate(template, data)
@@ -138,9 +136,23 @@ func main() {
 				return
 			}
 
+			// Read config again to get domain info
+			configFile, err := os.ReadFile(CozeOAuthConfigPath)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			var rawConfig struct {
+				CozeDomain string `json:"coze_www_base"`
+			}
+			if err := json.Unmarshal(configFile, &rawConfig); err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
 			data := map[string]interface{}{
 				"error":         fmt.Sprintf("Failed to get access token: %v", err),
-				"coze_www_base": config.CozeDomain,
+				"coze_www_base": rawConfig.CozeDomain,
 			}
 
 			w.WriteHeader(http.StatusInternalServerError)
@@ -182,8 +194,22 @@ func main() {
 		w.Write([]byte(result))
 	})
 
+	// Read config again to get client info for logging
+	configFile, err := os.ReadFile(CozeOAuthConfigPath)
+	if err != nil {
+		log.Fatalf("Error reading config file: %v", err)
+	}
+	var rawConfig struct {
+		ClientType  string `json:"client_type"`
+		ClientID    string `json:"client_id"`
+		CozeAPIBase string `json:"coze_api_base"`
+	}
+	if err := json.Unmarshal(configFile, &rawConfig); err != nil {
+		log.Fatalf("Error parsing config file: %v", err)
+	}
+
 	log.Printf("\nServer starting on http://127.0.0.1:8080 (API Base: %s, Client Type: %s, Client ID: %s)\n",
-		config.CozeAPIBase, config.ClientType, config.ClientID)
+		rawConfig.CozeAPIBase, rawConfig.ClientType, rawConfig.ClientID)
 	if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
