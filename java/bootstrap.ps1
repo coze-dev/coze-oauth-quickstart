@@ -1,2 +1,3 @@
 # PowerShell script to run gradle project
-.\gradlew.bat run 
+$CurrentPath = $PSScriptRoot
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c pushd `"$CurrentPath`" && call gradlew.bat run && popd" -Wait -NoNewWindow

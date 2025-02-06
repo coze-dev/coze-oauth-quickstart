@@ -88,7 +88,7 @@ for lang in python go java nodejs; do
              grep -v "node_modules" | \
              grep -v "package-lock.json" | \
              # java
-             grep -v "\.gradle" | \
+             grep -v "^\.gradle$" | \
              # zip
              zip "../../release/$zip_name" -@)
             echo "  ✨ Package created successfully: release/$zip_name"
