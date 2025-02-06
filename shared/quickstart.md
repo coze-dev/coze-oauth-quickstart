@@ -1,14 +1,9 @@
 Run this command for linux/macos:
 ```bash
-./bootstrap.sh
-```
-
-Run this command for windows:
-```bash
-bootstrap.bat
+bash bootstrap.sh
 ```
 
 Run this command for windows powershell:
 ```powershell
-bootstrap.ps1
+.\bootstrap.ps1
 ```

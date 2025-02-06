@@ -2,7 +2,7 @@
 
 set -e
 
-# 🌈 Let's make some magic happen! 
+# 🌈 Let's make some magic happen!
 echo "🚀 Starting the awesome file copying process..."
 for lang in python go java nodejs; do
     if [ ! -d "$lang" ]; then
@@ -15,9 +15,9 @@ for lang in python go java nodejs; do
         if [ -d "$dir" ]; then
             # Copy quickstart.md
             cp -f shared/quickstart.md "$dir/quickstart.md"
-            
+
             # Copy bootstrap files (sh, bat, ps1)
-            for ext in sh bat ps1; do
+            for ext in sh ps1; do
                 source_bootstrap_file="$lang/bootstrap.$ext"
                 if [ -f "$source_bootstrap_file" ]; then
                     cp -f "$source_bootstrap_file" "$dir/bootstrap.$ext"
@@ -88,7 +88,7 @@ for lang in python go java nodejs; do
              grep -v "node_modules" | \
              grep -v "package-lock.json" | \
              # java
-             grep -v ".gradle" | \
+             grep -v "\.gradle" | \
              # zip
              zip "../../release/$zip_name" -@)
             echo "  ✨ Package created successfully: release/$zip_name"
