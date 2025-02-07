@@ -10,10 +10,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.coze.openapi.client.auth.OAuthConfig;
 import org.apache.commons.io.IOUtils;
 
 import com.coze.openapi.client.auth.GetPKCEAuthURLResp;
+import com.coze.openapi.client.auth.OAuthConfig;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.PKCEOAuthClient;
 import com.coze.pkce.model.TokenResponse;
@@ -110,8 +110,7 @@ public class TokenServer {
             .get(
                 "/login",
                 ctx -> {
-                  GetPKCEAuthURLResp resp =
-                      oauthClient.genOAuthURL(redirectUri, "state");
+                  GetPKCEAuthURLResp resp = oauthClient.genOAuthURL(redirectUri, "state");
                   ctx.sessionAttribute(genCodeVerifierSessionKey(), resp.getCodeVerifier());
                   ctx.redirect(resp.getAuthorizationURL());
                 })
