@@ -129,7 +129,7 @@ public class TokenServer {
                   ctx.contentType("text/html");
                   ctx.result(html);
                 })
-            .start(port);
+            .start("127.0.0.1",port);
   }
 
   public void stop() {
