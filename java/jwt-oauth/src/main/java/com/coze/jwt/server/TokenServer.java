@@ -10,9 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.coze.openapi.client.auth.OAuthConfig;
 import org.apache.commons.io.IOUtils;
 
-import com.coze.jwt.config.AppConfig;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.JWTOAuthClient;
 
@@ -22,9 +22,9 @@ import io.javalin.http.staticfiles.Location;
 public class TokenServer {
   private final JWTOAuthClient oauthClient;
   private Javalin app;
-  private final AppConfig appConfig;
+  private final OAuthConfig appConfig;
 
-  public TokenServer(JWTOAuthClient oauthClient, AppConfig appConfig) {
+  public TokenServer(JWTOAuthClient oauthClient, OAuthConfig appConfig) {
     this.oauthClient = oauthClient;
     this.appConfig = appConfig;
   }

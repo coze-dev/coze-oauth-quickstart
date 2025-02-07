@@ -1,8 +1,8 @@
 package com.coze.web;
 
 import com.coze.openapi.client.auth.LoadAuthConfig;
+import com.coze.openapi.client.auth.OAuthConfig;
 import com.coze.openapi.service.auth.WebOAuthClient;
-import com.coze.web.config.AppConfig;
 import com.coze.web.server.TokenServer;
 
 public class Main {
@@ -13,7 +13,7 @@ public class Main {
     TokenServer server = null;
     try {
       // 加载配置
-      AppConfig config = AppConfig.load();
+      OAuthConfig config = OAuthConfig.load(new LoadAuthConfig(configFilePath));
 
       // 初始化 WEB OAuth 客户端
       WebOAuthClient oauth = WebOAuthClient.loadFromConfig(new LoadAuthConfig(configFilePath));

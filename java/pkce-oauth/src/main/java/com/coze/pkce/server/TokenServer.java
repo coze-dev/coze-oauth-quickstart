@@ -10,12 +10,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.coze.openapi.client.auth.OAuthConfig;
 import org.apache.commons.io.IOUtils;
 
 import com.coze.openapi.client.auth.GetPKCEAuthURLResp;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.PKCEOAuthClient;
-import com.coze.pkce.config.AppConfig;
 import com.coze.pkce.model.TokenResponse;
 
 import io.javalin.Javalin;
@@ -23,10 +23,11 @@ import io.javalin.http.staticfiles.Location;
 
 public class TokenServer {
   private final PKCEOAuthClient oauthClient;
-  private final AppConfig appConfig;
+  private final OAuthConfig appConfig;
   private Javalin app;
+  private final String redirectUri = "http://127.0.0.1:8080/callback";
 
-  public TokenServer(PKCEOAuthClient oauthClient, AppConfig appConfig) {
+  public TokenServer(PKCEOAuthClient oauthClient, OAuthConfig appConfig) {
     this.oauthClient = oauthClient;
     this.appConfig = appConfig;
   }
@@ -86,7 +87,7 @@ public class TokenServer {
                   try {
                     String codeVerifier = ctx.sessionAttribute(genCodeVerifierSessionKey());
                     OAuthToken tokenResp =
-                        oauthClient.getAccessToken(code, appConfig.getRedirectUri(), codeVerifier);
+                        oauthClient.getAccessToken(code, redirectUri, codeVerifier);
                     ctx.sessionAttribute(genTokenSessionKey(), tokenResp);
                     Map<String, String> model = new HashMap<>();
                     model.put("token_type", tokenResp.getTokenType());
@@ -110,7 +111,7 @@ public class TokenServer {
                 "/login",
                 ctx -> {
                   GetPKCEAuthURLResp resp =
-                      oauthClient.genOAuthURL(appConfig.getRedirectUri(), "state");
+                      oauthClient.genOAuthURL(redirectUri, "state");
                   ctx.sessionAttribute(genCodeVerifierSessionKey(), resp.getCodeVerifier());
                   ctx.redirect(resp.getAuthorizationURL());
                 })
