@@ -10,9 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.coze.openapi.client.auth.OAuthConfig;
 import org.apache.commons.io.IOUtils;
 
+import com.coze.openapi.client.auth.OAuthConfig;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.WebOAuthClient;
 import com.coze.web.model.TokenResponse;
@@ -87,8 +87,7 @@ public class TokenServer {
                         "Authorization failed: No authorization code received.");
                   }
                   try {
-                    OAuthToken tokenResp =
-                        oauthClient.getAccessToken(code, redirectUri);
+                    OAuthToken tokenResp = oauthClient.getAccessToken(code, redirectUri);
                     ctx.sessionAttribute(genTokenSessionKey(), tokenResp);
                     Map<String, String> model = new HashMap<>();
                     model.put("token_type", tokenResp.getTokenType());

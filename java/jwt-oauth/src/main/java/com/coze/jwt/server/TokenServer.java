@@ -10,9 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.coze.openapi.client.auth.OAuthConfig;
 import org.apache.commons.io.IOUtils;
 
+import com.coze.openapi.client.auth.OAuthConfig;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.JWTOAuthClient;
 
