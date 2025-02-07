@@ -27,6 +27,7 @@ for lang in python go java nodejs; do
             for shared_dir in shared/*; do
                 if [ "$lang" = "java" ]; then
                     target_dir="$dir/src/main/resources"
+                    mkdir -p "$target_dir"
                     cp -rf "$shared_dir" "$target_dir/"
                     echo "│   ├── ✅ Shared resources copied: $shared_dir to $target_dir"
                     continue
