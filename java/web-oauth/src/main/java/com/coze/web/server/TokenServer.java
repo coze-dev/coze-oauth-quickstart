@@ -12,9 +12,9 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 
+import com.coze.openapi.client.auth.OAuthConfig;
 import com.coze.openapi.client.auth.OAuthToken;
 import com.coze.openapi.service.auth.WebOAuthClient;
-import com.coze.web.config.AppConfig;
 import com.coze.web.model.TokenResponse;
 
 import io.javalin.Javalin;
@@ -22,10 +22,12 @@ import io.javalin.http.staticfiles.Location;
 
 public class TokenServer {
   private final WebOAuthClient oauthClient;
-  private final AppConfig appConfig;
+  private final OAuthConfig appConfig;
   private Javalin app;
 
-  public TokenServer(WebOAuthClient oauthClient, AppConfig appConfig) {
+  private final String redirectUri = "http://127.0.0.1:8080/callback";
+
+  public TokenServer(WebOAuthClient oauthClient, OAuthConfig appConfig) {
     this.oauthClient = oauthClient;
     this.appConfig = appConfig;
   }
@@ -85,8 +87,7 @@ public class TokenServer {
                         "Authorization failed: No authorization code received.");
                   }
                   try {
-                    OAuthToken tokenResp =
-                        oauthClient.getAccessToken(code, appConfig.getRedirectUri());
+                    OAuthToken tokenResp = oauthClient.getAccessToken(code, redirectUri);
                     ctx.sessionAttribute(genTokenSessionKey(), tokenResp);
                     Map<String, String> model = new HashMap<>();
                     model.put("token_type", tokenResp.getTokenType());
@@ -109,7 +110,7 @@ public class TokenServer {
             .get(
                 "/login",
                 ctx -> {
-                  String url = oauthClient.getOAuthURL(appConfig.getRedirectUri(), "state");
+                  String url = oauthClient.getOAuthURL(redirectUri, "state");
                   ctx.redirect(url);
                 })
             .post(
@@ -139,7 +140,7 @@ public class TokenServer {
                   ctx.contentType("text/html");
                   ctx.result(html);
                 })
-            .start(port);
+            .start("127.0.0.1", port);
   }
 
   private String formatHtml(String html, Map<String, String> model) {

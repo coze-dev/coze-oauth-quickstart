@@ -1,8 +1,8 @@
 package com.coze.jwt;
 
-import com.coze.jwt.config.AppConfig;
 import com.coze.jwt.server.TokenServer;
 import com.coze.openapi.client.auth.LoadAuthConfig;
+import com.coze.openapi.client.auth.OAuthConfig;
 import com.coze.openapi.service.auth.JWTOAuthClient;
 
 public class Main {
@@ -13,7 +13,7 @@ public class Main {
     TokenServer server = null;
     try {
       // 加载配置
-      AppConfig config = AppConfig.load();
+      OAuthConfig config = OAuthConfig.load(new LoadAuthConfig(configFilePath));
 
       // 初始化 JWT OAuth 客户端
       JWTOAuthClient oauth = JWTOAuthClient.loadFromConfig(new LoadAuthConfig(configFilePath));

@@ -39,7 +39,7 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 
     // coze api
-    implementation("com.coze:coze-api:0.2.1")
+    implementation("com.coze:coze-api:0.2.3")
 
     implementation("commons-io:commons-io:2.11.0")
 
