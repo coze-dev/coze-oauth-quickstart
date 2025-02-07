@@ -235,7 +235,7 @@ java/**/assets
 java/**/websites
 java/**/bootstrap.*
 java/**/quickstart.md
-java/**/src/main/resources/
+java/**/src/main/resources/**
 
 # nodejs
 node_modules/
