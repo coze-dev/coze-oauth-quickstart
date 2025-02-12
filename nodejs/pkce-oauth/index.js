@@ -10,7 +10,7 @@ const {
   getPKCEOAuthToken,
   refreshOAuthToken,
 } = require("@coze/api");
-
+const cors = require('@koa/cors');
 const REDIRECT_URI = "http://127.0.0.1:8080/callback";
 const configPath = path.join(__dirname, "coze_oauth_config.json");
 
@@ -98,6 +98,17 @@ app.use(session.createSession(SESSION_CONFIG, app));
 
 // Use bodyParser middleware
 app.use(bodyParser());
+
+// Use CORS middleware
+app.use(
+  cors({
+    credentials: true, // Support Request With Cookies
+    origin: ctx => {
+      const requestOrigin = ctx.get('Origin');
+      return requestOrigin || 'http://127.0.0.1:8080';
+    },
+  }),
+);
 
 // Static file service middleware
 app.use(async (ctx, next) => {
