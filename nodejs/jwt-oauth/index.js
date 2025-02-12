@@ -120,7 +120,7 @@ router.get("/callback", async (ctx) => {
     const oauthToken = await getJWTToken({
       baseURL: config.coze_api_base,
       appId: config.client_id,
-      aud: "api.coze.cn",
+      aud: new URL(config.coze_api_base).host,
       keyid: config.public_key_id,
       privateKey: config.private_key,
     });
