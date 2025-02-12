@@ -8,6 +8,7 @@ const {
   getWebOAuthToken,
   refreshOAuthToken,
 } = require("@coze/api");
+const cors = require('@koa/cors');
 
 const REDIRECT_URI = "http://127.0.0.1:8080/callback";
 const configPath = path.join(__dirname, "coze_oauth_config.json");
@@ -79,6 +80,9 @@ const router = new Router();
 
 // Use bodyParser middleware to parse POST request body
 app.use(bodyParser());
+
+// Use CORS middleware
+app.use(cors());
 
 // Static file service middleware
 app.use(async (ctx, next) => {

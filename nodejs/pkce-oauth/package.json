@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "@coze/api": "^1.0.15",
+    "@koa/cors": "^5.0.0",
     "koa": "^2.15.3",
     "koa-bodyparser": "^4.4.1",
     "koa-router": "^13.0.1",

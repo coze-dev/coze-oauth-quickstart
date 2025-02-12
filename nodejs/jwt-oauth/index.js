@@ -4,6 +4,7 @@ const bodyParser = require("koa-bodyparser");
 const fs = require("fs");
 const path = require("path");
 const { getJWTToken } = require("@coze/api");
+const cors = require('@koa/cors');
 
 const configPath = path.join(__dirname, "coze_oauth_config.json");
 
@@ -69,6 +70,9 @@ const config = loadConfig();
 
 const app = new Koa();
 const router = new Router();
+
+// Add CORS middleware
+app.use(cors());
 
 // Use bodyParser middleware to parse POST request body
 app.use(bodyParser());
