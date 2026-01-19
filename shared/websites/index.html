@@ -8,69 +8,74 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #f0f4ff 0%, #f8f9ff 100%);
+            background: #ffffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             padding: 2rem 1rem;
         }
         .card {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             background: white;
+            border: 1px solid #f0f0f0;
         }
         .card-body {
-            padding: 3rem 2rem;
+            padding: 3rem 2.5rem;
         }
         .logo {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 1.5rem;
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 2rem;
             display: block;
         }
         .title {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 1rem;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
             text-align: center;
+            letter-spacing: -0.02em;
         }
         .description {
             color: #666;
-            font-size: 1rem;
-            margin-bottom: 2rem;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.5;
             text-align: center;
         }
         .client-section {
-            background-color: #f8f9ff;
-            border-radius: 12px;
-            border: 1px solid #e8eeff;
-            margin: 1.5rem 0;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+            margin: 2rem 0;
             text-align: left;
         }
         .client-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e8eeff;
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #e8e8e8;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .client-header h3 {
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             font-weight: 600;
-            color: #333;
+            color: #1a1a1a;
             margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         .client-content {
-            padding: 1.5rem;
+            padding: 1.25rem;
             font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, monospace;
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             line-height: 1.6;
             color: #444;
             word-break: break-all;
@@ -78,36 +83,39 @@
         }
         .client-row {
             display: flex;
-            margin-bottom: 1rem;
+            margin-bottom: 0.875rem;
             text-align: left;
         }
         .client-row:last-child {
             margin-bottom: 0;
         }
         .client-label {
-            flex: 0 0 120px;
+            flex: 0 0 110px;
             color: #666;
             font-weight: 500;
+            font-size: 0.8125rem;
         }
         .client-value {
             flex: 1;
-            color: #111;
+            color: #1a1a1a;
         }
         .btn-start {
-            background-color: #6366f1;
+            background-color: #1a1a1a;
             border: none;
-            border-radius: 6px;
-            padding: 12px 32px;
-            font-size: 1rem;
+            border-radius: 8px;
+            padding: 14px 40px;
+            font-size: 0.9375rem;
+            font-weight: 500;
             color: white;
             transition: all 0.2s ease;
             display: inline-block;
         }
         .btn-start:hover {
-            background-color: #5558e6;
+            background-color: #333;
             transform: translateY(-1px);
             color: white;
             text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .text-center {
             text-align: center;
